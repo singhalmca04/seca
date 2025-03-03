@@ -74,7 +74,7 @@ app.get("/findstudent", async (req,res)=>{
         })
         res.status(200).send({data: finaldata});
     } catch(err) {
-        console.log(err);
+        console.log(err );
         res.status(500).send("Some Error");
     }
 })
