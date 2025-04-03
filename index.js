@@ -51,7 +51,7 @@ app.put("/save/student", async (req,res)=>{
 
 app.get("/finduser", async (req,res)=>{
     try{
-        let user = await user.find();
+        let user = await User.find();
         let sum = 0;
         user.map((u)=>{
             sum += u.marks;
