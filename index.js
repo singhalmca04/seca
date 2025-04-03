@@ -64,6 +64,17 @@ app.get("/finduser", async (req,res)=>{
     }
 })
 
+app.post("/update/user", async (req,res)=>{
+    try{
+        const {name, marks} = req.body;
+        let user = await User.updateOne({name: name}, {$set: {marks: marks}});
+        res.status(200).send({data: user});
+    } catch(err) {
+        console.log(err);
+        res.status(500).send("Some Error");
+    }
+})
+
 app.get("/findstudent", async (req,res)=>{
     try{
         let data = await Student.find().populate('user', {regno: 1, marks: 1});
