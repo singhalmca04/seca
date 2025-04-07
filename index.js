@@ -4,6 +4,8 @@ require('./db');
 const User = require('./users');
 const Student = require('./students');
 const bodyParser = require('body-parser');
+const cors = require("cors");
+app.use(cors()); // Allows all origins (not recommended for production)
 
 app.use(bodyParser.urlencoded({
     extended: false
@@ -12,10 +14,10 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 app.get('/show', (req, res)=>{
-    res.status(200).send("Hello world");
+    res.status(200).send({title: "Hello world"});
 });
 
-app.put("/save", async (req,res)=>{
+app.post("/save", async (req,res)=>{
     try{
         let user = new User();
         const {regno, name, marks} =  req.body;
@@ -51,7 +53,7 @@ app.put("/save/student", async (req,res)=>{
 
 app.get("/finduser", async (req,res)=>{
     try{
-        let user = await user.find();
+        let user = await User.find();
         let sum = 0;
         user.map((u)=>{
             sum += u.marks;
