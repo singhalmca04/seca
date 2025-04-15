@@ -24,8 +24,9 @@ app.post("/save", async (req,res)=>{
         user.regno = regno;
         user.name = name;
         user.marks = marks;
-        user = await user.save();
-        res.status(200).send({data: user});
+        await user.save();
+        let userData = await User.find().limit(10);
+        res.status(200).send({data: userData});
     } catch(err) {
         console.log(err);
         res.status(500).send("Some Error");
