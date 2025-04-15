@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 
-app.get('/show', (req, res)=>{
+app.get('/', (req, res)=>{
     res.status(200).send({title: "Hello world"});
 });
 
