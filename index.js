@@ -81,7 +81,7 @@ app.post("/update/user", async (req,res)=>{
 app.get("/findstudent", async (req,res)=>{
     try{
         let data = await Student.find().populate('user', {regno: 1, marks: 1});
-        let finaldata = {};
+        let finaldata = [];
         data.map((stu, index)=>{
             finaldata[index] = {regno: stu.user.regno, name: stu.name, aadhar: stu.aadhar, 
                 address: stu.address, marks: stu.user.marks};
