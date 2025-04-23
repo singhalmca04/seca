@@ -25,8 +25,30 @@ app.post("/save", async (req,res)=>{
         user.name = name;
         user.marks = marks;
         await user.save();
-        let userData = await User.find().limit(10);
+        let userData = await User.find().limit(100);
         res.status(200).send({data: userData});
+    } catch(err) {
+        console.log(err);
+        res.status(500).send("Some Error");
+    }
+});
+
+app.delete("/delete/:id", async (req,res)=>{
+    try{
+        console.log(req.params.id);
+        let result = await User.findByIdAndDelete(req.params.id);
+        res.status(200).send({data: result});
+    } catch(err) {
+        console.log(err);
+        res.status(500).send("Some Error");
+    }
+});
+
+app.put("/update/:id", async (req,res)=>{
+    try{
+        const {name, marks, regno} = req.body;
+        let result = await User.findOneAndUpdate({_id: req.params.id},{$set: {name, regno, marks}});
+        res.status(200).send({data: result});
     } catch(err) {
         console.log(err);
         res.status(500).send("Some Error");
