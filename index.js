@@ -161,30 +161,59 @@ app.get('/downloaduserx', async (req, res) => {
         let users = await User.find();
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Students');
-    
+
         worksheet.columns = [
-        { header: 'S.No', key: 'sno' },
-        { header: 'Name', key: 'name' },
-        { header: 'Marks', key: 'marks' },
-        { header: 'Reg No', key: 'regno' },
+            { header: 'S.No', key: 'sno' },
+            { header: 'Name', key: 'name' },
+            { header: 'Marks', key: 'marks' },
+            { header: 'Reg No', key: 'regno' },
         ];
-    
-        const data = users.map((user, index)=>{
-            return  { sno: index + 1, name: user.name, marks: user.marks, regno: user.regno }
+
+        const data = users.map((user, index) => {
+            return { sno: index + 1, name: user.name, marks: user.marks, regno: user.regno }
         });
-    
+
         data.forEach(item => {
-        worksheet.addRow(item);
+            worksheet.addRow(item);
         });
-    
+
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=students.xlsx');
-    
+
         await workbook.xlsx.write(res);
         res.end();
     } catch (error) {
         console.error(error);
         res.status(500).send('PDF generation failed');
+    }
+});
+app.use('/uploads', express.static(path.join(__dirname + '/uploads/')));
+
+app.get('/uploads/:name', function (req, res) {
+  var filePath = "/uploads/name";
+  fs.readFile(__dirname + filePath , function (err,data){
+    res.send(data);
+  });
+});
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // Folder where images will be stored
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname)); // Rename file to avoid conflicts
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// API route for uploading
+app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
+    try {
+        await User.findOneAndUpdate({_id: req.params.id}, {$set: {image: `/uploads/${req.file.filename}`}})
+        res.json({ message: 'Image uploaded successfully!', filePath: `/uploads/${req.file.filename}` });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Image not found');
     }
 });
 
