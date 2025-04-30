@@ -12,6 +12,7 @@ const path = require('path');
 const pdf = require('pdf-creator-node');
 const ExcelJS = require('exceljs');
 const multer = require('multer');
+const logger = require('./logger');
 
 app.use(bodyParser.urlencoded({
     extended: false
@@ -209,9 +210,12 @@ const upload = multer({ storage: storage });
 // API route for uploading
 app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
     try {
+        logger.error("value from req " + req.params.id + "  " + `/uploads/${req.file.filename}`);
         await User.findOneAndUpdate({_id: req.params.id}, {$set: {image: `/uploads/${req.file.filename}`}})
+        logger.error("User Updated");
         res.json({ message: 'Image uploaded successfully!', filePath: `/uploads/${req.file.filename}` });
     } catch (error) {
+        logger.error("error in catch " + error);
         console.error(error);
         res.status(200).send(error + ' Image not found');
     }
