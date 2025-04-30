@@ -213,7 +213,7 @@ app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
         res.json({ message: 'Image uploaded successfully!', filePath: `/uploads/${req.file.filename}` });
     } catch (error) {
         console.error(error);
-        res.status(500).send(error + ' Image not found');
+        res.status(200).send(error + ' Image not found');
     }
 });
 
