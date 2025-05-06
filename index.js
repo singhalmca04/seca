@@ -5,6 +5,7 @@ const User = require('./users');
 const Student = require('./students');
 const bodyParser = require('body-parser');
 const cors = require("cors");
+const asyncLoop = require('node-async-loop');
 app.use(cors()); // Allows all origins (not recommended for production)
 
 const fs = require('fs');
@@ -13,7 +14,10 @@ const pdf = require('pdf-creator-node');
 const ExcelJS = require('exceljs');
 const multer = require('multer');
 const logger = require('./logger');
+const mail = require('./mail');
+const xlsx = require('xlsx');
 
+// require('./whatsapp');
 app.use(bodyParser.urlencoded({
     extended: false
 }));
@@ -191,10 +195,10 @@ app.get('/downloaduserx', async (req, res) => {
 app.use('/uploads', express.static(path.join(__dirname + '/uploads/')));
 
 app.get('/uploads/:name', function (req, res) {
-  var filePath = "/uploads/name";
-  fs.readFile(__dirname + filePath , function (err,data){
-    res.send(data);
-  });
+    var filePath = "/uploads/name";
+    fs.readFile(__dirname + filePath, function (err, data) {
+        res.send(data);
+    });
 });
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -207,12 +211,37 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+const uploadx = multer({ storage: multer.memoryStorage() });
+
+app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
+    const file = req.file;
+    if (!file) return res.status(400).send('No file uploaded.');
+
+    const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet); // Convert sheet to JSON
+    if (data.length) {
+        asyncLoop(data, async function (x, next) {
+            await User.updateOne({name: x.Name},{$set: {regno: x["Reg No"], marks: x.Marks}})
+            next();
+        }, async function (err) {
+            if (err) {
+                
+            } else {
+                
+            }
+        });
+    }
+    return res.json({ success: true, data });
+});
+
 // API route for uploading
 app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
     try {
-        logger.error("value from req " + req.params.id + "  " + `/uploads/${req.file.filename}`);
-        await User.findOneAndUpdate({_id: req.params.id}, {$set: {image: `/uploads/${req.file.filename}`}})
-        logger.error("User Updated");
+        console.log("value from req " + req.params.id + "  " + `/uploads/${req.file.filename}`);
+        await User.findOneAndUpdate({ _id: req.params.id }, { $set: { image: `/uploads/${req.file.filename}` } })
+        console.log("User Updated");
         res.json({ message: 'Image uploaded successfully!', filePath: `/uploads/${req.file.filename}` });
     } catch (error) {
         logger.error("error in catch " + error);
@@ -220,6 +249,20 @@ app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
         res.status(200).send(error + ' Image not found');
     }
 });
+
+app.post("/send/mail", async (req, res) => {
+    try {
+        console.log(req.body);
+        // const { to, subject, body } = req.body;
+        const result = mail.sendMail(req.body);
+        console.log(result, 'res');
+        res.status(200).send({ data: "Mail Send Sucessfully" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Some Error in mail sending " + err);
+    }
+})
+
 
 app.listen(4000, () => {
     console.log("server started and again");
