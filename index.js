@@ -20,7 +20,6 @@ const xlsx = require('xlsx');
 app.use('/uploads', express.static(path.join(__dirname + '/uploads/')));
 app.use('/students', express.static(path.join(__dirname, 'students')));
 
-// require('./whatsapp');
 app.use(bodyParser.urlencoded({
     extended: false
 }));
@@ -317,7 +316,7 @@ app.post("/send/mail", async (req, res) => {
 // const storage2 = multer.memoryStorage();
 // const upload2 = multer({ storage2 });
 const upload2 = multer({
-    storage: multer.memoryStorage({ /* ... */ }),
+    storage: multer.memoryStorage(),
     limits: { fileSize: 40 * 1024 * 1024 } // 40 MB
 });
 
