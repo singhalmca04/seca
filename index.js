@@ -25,7 +25,7 @@ app.use(bodyParser.urlencoded({
     extended: false
 }));
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '40mb' }));
 
 app.get('/deleteall', async (req, res) => {
     try {
@@ -314,8 +314,15 @@ app.post("/send/mail", async (req, res) => {
     }
 })
 
-const storage2 = multer.memoryStorage();
-const upload2 = multer({ storage2 });
+// const storage2 = multer.memoryStorage();
+// const upload2 = multer({ storage2 });
+const upload2 = multer({
+    storage: multer.memoryStorage({ /* ... */ }),
+    limits: { fileSize: 40 * 1024 * 1024 } // 40 MB
+});
+
+app.use(express.json({ limit: '40mb' }));
+app.use(express.urlencoded({ limit: '40mb', extended: true }));
 
 app.post('/upload/bulk/images', upload2.array('images'), async (req, res) => {
     const files = req.files;
