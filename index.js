@@ -177,7 +177,7 @@ app.get('/downloaduser', async (req, res) => {
                 uData: userData,
                 srmlogo: getBase64Image('/uploads/srm-logo.png'),
                 srm: getBase64Image('/uploads/srm.png'),
-                image: getBase64Image('/uploads/test1.png')
+                image: getBase64Image('/uploads/test1.jpg')
             },
             path: './output.pdf',
             type: '', // can be 'buffer' or 'stream'
