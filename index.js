@@ -17,6 +17,9 @@ const logger = require('./logger');
 const mail = require('./mail');
 const xlsx = require('xlsx');
 
+app.use('/uploads', express.static(path.join(__dirname + '/uploads/')));
+app.use('/students', express.static(path.join(__dirname, 'students')));
+
 // require('./whatsapp');
 app.use(bodyParser.urlencoded({
     extended: false
@@ -24,8 +27,22 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-    res.status(200).send({ title: "Hello world" });
+app.get('/deleteall', async (req, res) => {
+    try {
+        const u = await User.deleteMany({});
+        res.status(200).send({ data: u });
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
+});
+
+app.get('/deleteall/students', async (req, res) => {
+    try {
+        const u = await Student.deleteMany({});
+        res.status(200).send({ data: u });
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
 });
 
 app.post("/save", async (req, res) => {
@@ -46,7 +63,6 @@ app.post("/save", async (req, res) => {
 
 app.delete("/delete/:id", async (req, res) => {
     try {
-        console.log(req.params.id);
         let result = await User.findByIdAndDelete(req.params.id);
         res.status(200).send({ data: result });
     } catch (err) {
@@ -70,9 +86,7 @@ app.put("/save/student", async (req, res) => {
     try {
         let student = new Student();
         const { name, aadhar, address } = req.body;
-        console.log(name);
         let u = await User.findOne({ name }, { _id: 1 });
-        console.log(u)
         student.user = u._id;
         student.aadhar = aadhar;
         student.name = name;
@@ -88,12 +102,12 @@ app.put("/save/student", async (req, res) => {
 app.get("/finduser", async (req, res) => {
     try {
         let user = await User.find();
-        let sum = 0;
-        user.map((u) => {
-            sum += u.marks;
-        })
-        let average = sum / user.length;
-        res.status(200).send({ data: user, avg: average });
+        // let sum = 0;
+        // user.map((u) => {
+        //     sum += u.marks;
+        // })
+        // let average = sum / user.length;
+        res.status(200).send({ data: user });
     } catch (err) {
         console.log(err);
         res.status(500).send("Some Error");
@@ -111,53 +125,73 @@ app.post("/update/user", async (req, res) => {
     }
 })
 
-app.get("/findstudent", async (req, res) => {
+app.get("/findstudents", async (req, res) => {
     try {
-        let data = await Student.find().populate('user', { regno: 1, marks: 1 });
-        let finaldata = [];
-        data.map((stu, index) => {
-            finaldata[index] = {
-                regno: stu.user.regno, name: stu.name, aadhar: stu.aadhar,
-                address: stu.address, marks: stu.user.marks
-            };
-        })
-        res.status(200).send({ data: finaldata });
+        let data = await Student.find();
+        res.status(200).send({ data: data });
     } catch (err) {
         console.log(err + "error");
         res.status(500).send("Some Error");
     }
 })
 
+function getBase64Image(filePath) {
+    const imagePath = path.join(__dirname, filePath); // Adjust if needed
+    const image = fs.readFileSync(imagePath);
+    const ext = path.extname(filePath).substring(1); // e.g., 'jpg'
+    return `data:image/${ext};base64,${image.toString('base64')}`;
+}
+
 app.get('/downloaduser', async (req, res) => {
+    const srmlogo = getBase64Image('/uploads/srm-logo.png');
+    const srm = getBase64Image('/uploads/srm.png');
+    const def = getBase64Image('/uploads/srm.png');
     let users = await User.find();
-    const usersWithSerial = users.map((s, i) => ({ name: s.name, marks: s.marks, regno: s.regno, sno: i + 1 }));
-    // Read HTML template
-    const html = fs.readFileSync(path.join(__dirname, '/templates/user.html'), 'utf8');
+    if (users && users.length) {
+        let ieDetails = await Student.find({ semester: users[0].semester, batch: users[0].batch })
+        const usersWithSerial = users.map((s, i) => ({
+            name: s.name,
+            semester: s.semester,
+            section: s.section,
+            regno: s.regno,
+            sno: s.regno.substring(2),
+            srmlogo,
+            srm,
+            ieData: ieDetails[0],
+            ieDetails,
+            image: s.image ? getBase64Image(s.image) : def
+        }));
+        // Read HTML template
+        const html = fs.readFileSync(path.join(__dirname, '/templates/user.html'), 'utf8');
+        const options = {
+            format: 'A4',
+            orientation: 'portrait',
+            border: '10mm',
+        };
+        let userData = {
+            user: JSON.parse(JSON.stringify(usersWithSerial))
+        }
+        const document = {
+            html: html,
+            data: {
+                uData: userData,
+                srmlogo: getBase64Image('/uploads/srm-logo.png'),
+                srm: getBase64Image('/uploads/srm.png'),
+                image: getBase64Image('/uploads/test1.png')
+            },
+            path: './output.pdf',
+            type: '', // can be 'buffer' or 'stream'
+        };
 
-    const options = {
-        format: 'A4',
-        orientation: 'portrait',
-        border: '10mm',
-    };
-    let userData = {
-        user: JSON.parse(JSON.stringify(usersWithSerial))
-    }
-    const document = {
-        html: html,
-        data: {
-            bugs: userData
-        },
-        path: './output.pdf',
-        type: '', // can be 'buffer' or 'stream'
-    };
-
-    try {
-        await pdf.create(document, options);
-        res.download('output.pdf');
-        //   return res.status(200).send({path: "http://localhost:4000/output.pdf"});
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('PDF generation failed');
+        try {
+            await pdf.create(document, options);
+            res.download('output.pdf');
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('PDF generation failed');
+        }
+    } else {
+        res.status(200).send('No users found');
     }
 });
 
@@ -192,7 +226,6 @@ app.get('/downloaduserx', async (req, res) => {
         res.status(500).send('PDF generation failed');
     }
 });
-app.use('/uploads', express.static(path.join(__dirname + '/uploads/')));
 
 app.get('/uploads/:name', function (req, res) {
     var filePath = "/uploads/name";
@@ -205,7 +238,7 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/'); // Folder where images will be stored
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Rename file to avoid conflicts
+        cb(null, file.originalname);
     }
 });
 
@@ -223,13 +256,36 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
     const data = xlsx.utils.sheet_to_json(sheet); // Convert sheet to JSON
     if (data.length) {
         asyncLoop(data, async function (x, next) {
-            await User.updateOne({name: x.Name},{$set: {regno: x["Reg No"], marks: x.Marks}})
+            await User.insertOne({ name: x.Name, regno: x["Reg No"], semester: x.semester, section: x.section, batch: x.batch });
             next();
         }, async function (err) {
             if (err) {
-                
+
             } else {
-                
+
+            }
+        });
+    }
+    return res.json({ success: true, data });
+});
+
+app.post('/uploadexcelie', uploadx.single('file'), (req, res) => {
+    const file = req.file;
+    if (!file) return res.status(400).send('No file uploaded.');
+
+    const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet); // Convert sheet to JSON
+    if (data.length) {
+        asyncLoop(data, async function (x, next) {
+            await Student.insertOne({ ie: x.ie, month: x["month"], year: x.year, program: x.program, semester: x.semester, section: x.section, batch: x.batch, subcode: x.subcode, subject: x.subject, examdate: x.examdate, session: x.session });
+            next();
+        }, async function (err) {
+            if (err) {
+
+            } else {
+
             }
         });
     }
@@ -239,9 +295,7 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
 // API route for uploading
 app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
     try {
-        console.log("value from req " + req.params.id + "  " + `/uploads/${req.file.filename}`);
         await User.findOneAndUpdate({ _id: req.params.id }, { $set: { image: `/uploads/${req.file.filename}` } })
-        console.log("User Updated");
         res.json({ message: 'Image uploaded successfully!', filePath: `/uploads/${req.file.filename}` });
     } catch (error) {
         logger.error("error in catch " + error);
@@ -252,10 +306,7 @@ app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
 
 app.post("/send/mail", async (req, res) => {
     try {
-        console.log(req.body);
-        // const { to, subject, body } = req.body;
         const result = mail.sendMail(req.body);
-        console.log(result, 'res');
         res.status(200).send({ data: "Mail Send Sucessfully" });
     } catch (err) {
         console.log(err);
@@ -263,6 +314,28 @@ app.post("/send/mail", async (req, res) => {
     }
 })
 
+const storage2 = multer.memoryStorage();
+const upload2 = multer({ storage2 });
+
+app.post('/upload/bulk/images', upload2.array('images'), async (req, res) => {
+    const files = req.files;
+
+    if (!files || files.length === 0) {
+        return res.status(400).send('No files uploaded.');
+    }
+    let count = 0;
+    for (const file of files) {
+        const user = await User.findOne({ regno: path.parse(file.originalname).name });
+        if (user) {
+            const savePath = path.join(__dirname, 'students', file.originalname);
+            fs.writeFileSync(savePath, file.buffer);
+            user.image = `/students/${file.originalname}`;
+            count++;
+            await user.save();
+        }
+    }
+    res.send({ message: 'Images uploaded successfully.', count });
+});
 
 app.listen(4000, () => {
     console.log("server started and again");

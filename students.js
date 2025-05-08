@@ -3,10 +3,17 @@ const Schema = mongoose.Schema;
 const timestamps = require('mongoose-timestamps');
 
 const StudentSchema = new Schema({
-    name: {type: String, default: ''},
-    aadhar: {type: String, default: ''},
-    address: {type: String, default: ''},
-    user: {type: mongoose.Schema.ObjectId, ref: 'User', required: true}
+    ie: {type: String, default: 'I'},
+    month: {type: String, default: ''},
+    year: {type: String, default: ''},
+    program: {type: String, default: ''},
+    section: {type: String, default: ''},
+    semester: {type: String, default: ''},
+    subcode: {type: String, default: ''},
+    subject: {type: String, default: ''},
+    examdate: {type: String, default: ''},
+    session: {type: String, default: ''},
+    batch: {type: String, default: ''}
 });
 
 StudentSchema.pre("save", (next)=>{

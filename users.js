@@ -5,7 +5,9 @@ const timestamps = require('mongoose-timestamps');
 const UserSchema = new Schema({
     regno: {type: String, default: ''},
     name: {type: String, default: ''},
-    marks: {type: Number, default: 0},
+    semester: {type: String, default: ''},
+    section: {type: String, default: ''},
+    batch: {type: String, default: ''},
     image: {type: String, default: ''}
 });
 
