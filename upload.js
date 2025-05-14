@@ -1,27 +1,32 @@
-const multer = require('multer');
-const path = require('path');
+import { v2 as cloudinary } from 'cloudinary';
 
-// Configure storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'students/'); // Save in /students folder
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
-  }
-});
+(async function () {
+  // Configuration
+  cloudinary.config({
+    cloud_name: 'dnf95bknw',
+    api_key: '765779528822428',
+    api_secret: 'U8ot9_6nDCrGZ6vyXsLB_aCGXPY' // Click 'View API Keys' above to copy your API secret
+  });
 
-// File filter (optional)
-const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (['.png', '.jpg', '.jpeg', '.gif'].includes(ext)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only images are allowed'), false);
-  }
-};
+  // Upload an image
+  const uploadResult = await cloudinary.uploader
+    .upload(
+      './students/RA2311003030131.jpg', {
+      public_id: 'RA2311003030131',
+    }
+    )
+    .catch((error) => {
+      console.log(error);
+    });
 
-const upload = multer({ storage, fileFilter });
+  console.log(uploadResult);
 
-module.exports = upload;
+  // Optimize delivery by resizing and applying auto-format and auto-quality
+  // const optimizeUrl = cloudinary.url('shoes', {
+  //   fetch_format: 'auto',
+  //   quality: 'auto'
+  // });
+
+  // console.log(optimizeUrl);
+
+})();

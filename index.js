@@ -3,6 +3,7 @@ const app = express();
 require('./db');
 const User = require('./users');
 const Student = require('./students');
+// require('./upload');
 const bodyParser = require('body-parser');
 const cors = require("cors");
 const asyncLoop = require('node-async-loop');
@@ -16,6 +17,7 @@ const multer = require('multer');
 const logger = require('./logger');
 const mail = require('./mail');
 const xlsx = require('xlsx');
+const axios = require('axios');
 
 app.use('/uploads', express.static(path.join(__dirname + '/uploads/')));
 app.use('/students', express.static(path.join(__dirname, 'students')));
@@ -72,8 +74,8 @@ app.delete("/delete/:id", async (req, res) => {
 
 app.put("/update/:id", async (req, res) => {
     try {
-        const { name, marks, regno } = req.body;
-        let result = await User.findOneAndUpdate({ _id: req.params.id }, { $set: { name, regno, marks } });
+        const { name, regno, semester, section, batch, subcode } = req.body;
+        let result = await User.findOneAndUpdate({ _id: req.params.id }, { $set: { name, regno, semester, section, batch, subcode: subcode[0].split(',').map(code => code.trim()) } });
         res.status(200).send({ data: result });
     } catch (err) {
         console.log(err);
@@ -141,25 +143,65 @@ function getBase64Image(filePath) {
     return `data:image/${ext};base64,${image.toString('base64')}`;
 }
 
+const getBase64FromUrl = async (imageUrl) => {
+    const response = await axios.get(imageUrl, {
+        responseType: 'arraybuffer',
+    });
+
+    const base64 = Buffer.from(response.data, 'binary').toString('base64');
+
+    // Detect MIME type from URL extension (optional but useful)
+    const mimeType = imageUrl.endsWith('.png') ? 'image/png'
+        : imageUrl.endsWith('.jpg') || imageUrl.endsWith('.jpeg') ? 'image/jpeg'
+            : 'image/*';
+
+    return `data:${mimeType};base64,${base64}`;
+};
+
 app.get('/downloaduser', async (req, res) => {
     const srmlogo = getBase64Image('/uploads/srm-logo.png');
     const srm = getBase64Image('/uploads/srm.png');
     const def = getBase64Image('/uploads/srm.png');
     let users = await User.find();
     if (users && users.length) {
-        let ieDetails = await Student.find({ semester: users[0].semester, batch: users[0].batch })
-        const usersWithSerial = users.map((s, i) => ({
-            name: s.name,
-            semester: s.semester,
-            section: s.section,
-            regno: s.regno,
-            sno: s.regno.substring(2),
-            srmlogo,
-            srm,
-            ieData: ieDetails[0],
-            ieDetails,
-            image: s.image ? getBase64Image(s.image) : def
+        let ieDetails = await Student.find({ semester: users[0].semester, batch: users[0].batch }).sort({examdate: 1})
+        const userWithSubject = await Promise.all(users.map(async (user) => {
+            const img = user.image ? await getBase64FromUrl(user.image) : def;
+
+            // Filter only the subjects this student has
+            const personalSubjects = ieDetails.filter(sub =>
+                user.subcode.includes(sub.subcode)
+            );
+
+            return {
+                regno: user.regno,
+                name: user.name,
+                semester: user.semester,
+                section: user.section,
+                batch: user.batch,
+                image: img,
+                subcode: user.subcode,
+                sno: user.regno.substring(2),
+                srmlogo,
+                srm,
+                ieData: ieDetails[0],  // Optional: general info
+                ieDetails: personalSubjects, // 👈 only student's subjects
+            };
         }));
+
+        // console.log(userWithSubject, 'aa')
+        // const usersWithSerial = userWithSubject.map(async (s, i) => ({
+        //     name: s.name,
+        //     semester: s.semester,
+        //     section: s.section,
+        //     regno: s.regno,
+        //     sno: s.regno.substring(2),
+        //     srmlogo,
+        //     srm,
+        //     ieData: ieDetails[0],
+        //     ieDetails,
+        //     image: s.image ? await getBase64ImageFromUrl(s.image) : def
+        // }));
         // Read HTML template
         const html = fs.readFileSync(path.join(__dirname, '/templates/user.html'), 'utf8');
         const options = {
@@ -168,7 +210,7 @@ app.get('/downloaduser', async (req, res) => {
             border: '10mm',
         };
         let userData = {
-            user: JSON.parse(JSON.stringify(usersWithSerial))
+            user: JSON.parse(JSON.stringify(userWithSubject))
         }
         const document = {
             html: html,
@@ -181,7 +223,7 @@ app.get('/downloaduser', async (req, res) => {
             path: './output.pdf',
             type: '', // can be 'buffer' or 'stream'
         };
-
+        // res.status(200).send('No users found');
         try {
             await pdf.create(document, options);
             res.download('output.pdf');
@@ -255,7 +297,16 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
     const data = xlsx.utils.sheet_to_json(sheet); // Convert sheet to JSON
     if (data.length) {
         asyncLoop(data, async function (x, next) {
-            await User.insertOne({ name: x.Name, regno: x["Reg No"], semester: x.semester, section: x.section, batch: x.batch });
+            let subcode = [];
+            subcode.push(x.subcode1);
+            subcode.push(x.subcode2);
+            subcode.push(x.subcode3);
+            subcode.push(x.subcode4);
+            subcode.push(x.subcode5);
+            if (x.subcode6) {
+                subcode.push(x.subcode6);
+            }
+            await User.insertOne({ name: x.Name, regno: x["Reg No"], semester: x.semester, section: x.section, batch: x.batch, subcode });
             next();
         }, async function (err) {
             if (err) {
@@ -341,6 +392,23 @@ app.post('/upload/bulk/images', upload2.array('images'), async (req, res) => {
         }
     }
     res.send({ message: 'Images uploaded successfully.', count });
+});
+
+app.post('/upload/image/path', async (req, res) => {
+    try {
+        const { fileName, imageUrl } = req.body;
+        const user = await User.findOne({ regno: fileName });
+        if (user) {
+            user.image = imageUrl;
+            await user.save();
+            res.send({ message: 'Images uploaded successfully.' });
+        } else {
+            res.send({ message: 'Error in uploading' });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Error in uploading " + err);
+    }
 });
 
 app.listen(4000, () => {

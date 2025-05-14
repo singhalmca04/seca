@@ -8,7 +8,8 @@ const UserSchema = new Schema({
     semester: {type: String, default: ''},
     section: {type: String, default: ''},
     batch: {type: String, default: ''},
-    image: {type: String, default: ''}
+    image: {type: String, default: ''},
+    subcode: {type: Array, default: []}
 });
 
 UserSchema.pre("save", (next)=>{
