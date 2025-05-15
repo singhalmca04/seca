@@ -213,18 +213,20 @@ app.get('/downloaduser', async (req, res) => {
         // };
         // res.status(200).send('No users found');
         try {
-            const templatePath = path.join(__dirname, 'templates', 'user.html');
-            const pdfPath = await pdfgen.generatePDF({
-                templatePath,
-                data: { uData: userData },
-                outputPath: '/tmp/user-profile.pdf' // ✅ use /tmp in Vercel
+            const templateSource = fs.readFileSync(path.resolve('./templates/user.html'), 'utf8');
+            const template = Handlebars.compile(templateSource);
+
+            const html = template({
+                uData: {
+                    user: userData
+                }
             });
 
-            const file = fs.readFileSync(pdfPath);
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'attachment; filename=user-profile.pdf');
-            res.send(file);
+            const pdfBuffer = await generatePDF({ html });
 
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename="report.pdf"');
+            res.send(pdfBuffer);
         } catch (error) {
             console.error(error);
             res.status(500).send('PDF generation failed');

@@ -1,22 +1,20 @@
 const puppeteer = require('puppeteer-core');
-const chromium = require('chrome-aws-lambda');
-const fs = require('fs');
-const Handlebars = require('handlebars');
 
-const compileTemplate = (templatePath, data) => {
-  const source = fs.readFileSync(templatePath, 'utf8');
-  const template = Handlebars.compile(source);
-  return template(data);
-};
+/**
+ * Generates a PDF buffer from provided HTML using a remote headless browser (e.g., Browserless)
+ * @param {Object} params
+ * @param {string} params.html - Fully compiled HTML string
+ * @param {Object} [params.pdfOptions] - Optional puppeteer PDF options
+ * @param {string} [params.browserWSEndpoint] - Browserless or remote browser WebSocket endpoint
+ * @returns {Promise<Buffer>} PDF as a Buffer
+ */
+const generatePDF = async ({ html, pdfOptions = {}, browserWSEndpoint }) => {
+  if (!html) {
+    throw new Error("Missing required parameter: 'html'");
+  }
 
-const generatePDF = async ({ templatePath, data }) => {
-  const html = compileTemplate(templatePath, data);
-
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath,
-    headless: chromium.headless,
-    defaultViewport: chromium.defaultViewport
+  const browser = await puppeteer.connect({
+    browserWSEndpoint: browserWSEndpoint || 'wss://chrome.browserless.io?token=2SJbs4OartWOV6u259b231a8f77e604a4b012fcb80b3d8d96'
   });
 
   const page = await browser.newPage();
@@ -24,7 +22,8 @@ const generatePDF = async ({ templatePath, data }) => {
 
   const pdfBuffer = await page.pdf({
     format: 'A4',
-    printBackground: true
+    printBackground: true,
+    ...pdfOptions
   });
 
   await browser.close();
