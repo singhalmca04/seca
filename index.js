@@ -218,8 +218,8 @@ app.get('/downloaduser', async (req, res) => {
             const template = Handlebars.compile(templateSource);
 
             const html = template({
-                uData: {
-                    user: userData
+                data: {
+                    uData: userData
                 }
             });
 
