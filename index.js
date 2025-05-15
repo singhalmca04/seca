@@ -218,8 +218,8 @@ app.get('/downloaduser', async (req, res) => {
             const template = Handlebars.compile(templateSource);
 
             const html = template({
-                data: {
-                    uData: userData
+                uData: {
+                    user: JSON.parse(JSON.stringify(userWithSubject))
                 }
             });
 
