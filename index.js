@@ -11,13 +11,14 @@ app.use(cors()); // Allows all origins (not recommended for production)
 
 const fs = require('fs');
 const path = require('path');
-const pdf = require('pdf-creator-node');
+// const pdf = require('pdf-creator-node');
 const ExcelJS = require('exceljs');
 const multer = require('multer');
 const logger = require('./logger');
 const mail = require('./mail');
 const xlsx = require('xlsx');
 const axios = require('axios');
+const pdfgen = require('./pdfgenerator');
 
 app.use('/uploads', express.static(path.join(__dirname + '/uploads/')));
 app.use('/students', express.static(path.join(__dirname, 'students')));
@@ -164,7 +165,7 @@ app.get('/downloaduser', async (req, res) => {
     const def = getBase64Image('/uploads/srm.png');
     let users = await User.find();
     if (users && users.length) {
-        let ieDetails = await Student.find({ semester: users[0].semester, batch: users[0].batch }).sort({examdate: 1})
+        let ieDetails = await Student.find({ semester: users[0].semester, batch: users[0].batch }).sort({ examdate: 1 })
         const userWithSubject = await Promise.all(users.map(async (user) => {
             const img = user.image ? await getBase64FromUrl(user.image) : def;
 
@@ -189,44 +190,48 @@ app.get('/downloaduser', async (req, res) => {
             };
         }));
 
-        // console.log(userWithSubject, 'aa')
-        // const usersWithSerial = userWithSubject.map(async (s, i) => ({
-        //     name: s.name,
-        //     semester: s.semester,
-        //     section: s.section,
-        //     regno: s.regno,
-        //     sno: s.regno.substring(2),
-        //     srmlogo,
-        //     srm,
-        //     ieData: ieDetails[0],
-        //     ieDetails,
-        //     image: s.image ? await getBase64ImageFromUrl(s.image) : def
-        // }));
         // Read HTML template
-        const html = fs.readFileSync(path.join(__dirname, '/templates/user.html'), 'utf8');
-        const options = {
-            format: 'A4',
-            orientation: 'portrait',
-            border: '10mm',
-        };
+        // const html = fs.readFileSync(path.join(__dirname, '/templates/user.html'), 'utf8');
+        // const options = {
+        //     format: 'A4',
+        //     orientation: 'portrait',
+        //     border: '10mm',
+        // };
         let userData = {
             user: JSON.parse(JSON.stringify(userWithSubject))
         }
-        const document = {
-            html: html,
-            data: {
-                uData: userData,
-                srmlogo: getBase64Image('/uploads/srm-logo.png'),
-                srm: getBase64Image('/uploads/srm.png'),
-                image: getBase64Image('/uploads/test1.jpg')
-            },
-            path: './output.pdf',
-            type: '', // can be 'buffer' or 'stream'
-        };
+        // const document = {
+        //     html: html,
+        //     data: {
+        //         uData: userData,
+        //         srmlogo: getBase64Image('/uploads/srm-logo.png'),
+        //         srm: getBase64Image('/uploads/srm.png'),
+        //         image: getBase64Image('/uploads/test1.jpg')
+        //     },
+        //     path: './output.pdf',
+        //     type: '', // can be 'buffer' or 'stream'
+        // };
         // res.status(200).send('No users found');
         try {
-            await pdf.create(document, options);
-            res.download('output.pdf');
+            // await pdf.create(document, options);
+            // res.download('output.pdf');
+            // const html = fs.readFileSync(path.join(__dirname, './templates/user.html'), 'utf8');
+            // const pdfBuffer = await pdfgen.generatePDF(html, { uData: userData });
+
+            // res.set({
+            //     'Content-Type': 'application/pdf',
+            //     'Content-Disposition': 'attachment; filename="user-profile.pdf"',
+            //     'Content-Length': pdfBuffer.length
+            // });
+
+            // res.send(pdfBuffer);
+            const htmlPath = path.join(__dirname, 'templates/user.html');
+            const outputPath = path.join(__dirname, 'output.pdf');
+
+            await pdfgen.generatePDF(htmlPath, { uData: { user: users } }, outputPath);
+
+            res.download(outputPath, 'user-profile.pdf');
+
         } catch (error) {
             console.error(error);
             res.status(500).send('PDF generation failed');
