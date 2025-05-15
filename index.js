@@ -164,7 +164,7 @@ app.get('/downloaduser', async (req, res) => {
     const srmlogo = getBase64Image('/uploads/srm-logo.png');
     const srm = getBase64Image('/uploads/srm.png');
     const def = getBase64Image('/uploads/srm.png');
-    let users = await User.find();
+    let users = await User.find().limit(30);
     if (users && users.length) {
         let ieDetails = await Student.find({ semester: users[0].semester, batch: users[0].batch }).sort({ examdate: 1 })
         const userWithSubject = await Promise.all(users.map(async (user) => {
