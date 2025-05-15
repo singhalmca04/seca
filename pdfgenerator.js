@@ -9,12 +9,12 @@ const compileTemplate = (templatePath, data) => {
   return template(data);
 };
 
-const generatePDF = async ({ templatePath, data, outputPath = '/tmp/output.pdf' }) => {
+const generatePDF = async ({ templatePath, data }) => {
   const html = compileTemplate(templatePath, data);
 
   const browser = await puppeteer.launch({
     args: chromium.args,
-    executablePath: await chromium.executablePath || '/usr/bin/chromium-browser',
+    executablePath: await chromium.executablePath,
     headless: chromium.headless,
     defaultViewport: chromium.defaultViewport
   });
@@ -22,16 +22,15 @@ const generatePDF = async ({ templatePath, data, outputPath = '/tmp/output.pdf' 
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: 'networkidle0' });
 
-  await page.pdf({
-    path: outputPath,
+  const pdfBuffer = await page.pdf({
     format: 'A4',
     printBackground: true
   });
 
   await browser.close();
-  return outputPath;
+  return pdfBuffer;
 };
 
 module.exports = {
-    generatePDF
-}
+  generatePDF
+};
