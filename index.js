@@ -160,11 +160,21 @@ const getBase64FromUrl = async (imageUrl) => {
     return `data:${mimeType};base64,${base64}`;
 };
 
-app.get('/downloaduser', async (req, res) => {
+app.get('/downloaduser/:group', async (req, res) => {
     const srmlogo = getBase64Image('/uploads/srm-logo.png');
     const srm = getBase64Image('/uploads/srm.png');
     const def = getBase64Image('/uploads/srm.png');
-    let users = await User.find().limit(30);
+    const group = req.params.group;
+    let count = await User.countDocuments();
+    console.log(count, count/2);
+    let users = [];
+    if (group==1) {
+        users = await User.find().limit(Math.ceil(count/2));
+        console.log(users.length, '1111');
+    } else {
+        users = await User.find().skip(Math.ceil(count/2));
+        console.log(users.length, '2222');
+    }
     if (users && users.length) {
         let ieDetails = await Student.find({ semester: users[0].semester, batch: users[0].batch }).sort({ examdate: 1 })
         const userWithSubject = await Promise.all(users.map(async (user) => {
