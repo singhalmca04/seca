@@ -213,24 +213,17 @@ app.get('/downloaduser', async (req, res) => {
         // };
         // res.status(200).send('No users found');
         try {
-            // await pdf.create(document, options);
-            // res.download('output.pdf');
-            // const html = fs.readFileSync(path.join(__dirname, './templates/user.html'), 'utf8');
-            // const pdfBuffer = await pdfgen.generatePDF(html, { uData: userData });
+            const templatePath = path.join(__dirname, 'templates', 'user.html');
+            const pdfPath = await pdfgen.generatePDF({
+                templatePath,
+                data: { uData: userData },
+                outputPath: '/tmp/user-profile.pdf' // ✅ use /tmp in Vercel
+            });
 
-            // res.set({
-            //     'Content-Type': 'application/pdf',
-            //     'Content-Disposition': 'attachment; filename="user-profile.pdf"',
-            //     'Content-Length': pdfBuffer.length
-            // });
-
-            // res.send(pdfBuffer);
-            const htmlPath = path.join(__dirname, 'templates/user.html');
-            const outputPath = path.join(__dirname, 'output.pdf');
-
-            await pdfgen.generatePDF(htmlPath, { uData: { user: users } }, outputPath);
-
-            res.download(outputPath, 'user-profile.pdf');
+            const file = fs.readFileSync(pdfPath);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=user-profile.pdf');
+            res.send(file);
 
         } catch (error) {
             console.error(error);
