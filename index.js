@@ -19,6 +19,7 @@ const mail = require('./mail');
 const xlsx = require('xlsx');
 const axios = require('axios');
 const pdfgen = require('./pdfgenerator');
+const Handlebars = require('handlebars');
 
 app.use('/uploads', express.static(path.join(__dirname + '/uploads/')));
 app.use('/students', express.static(path.join(__dirname, 'students')));
@@ -222,7 +223,7 @@ app.get('/downloaduser', async (req, res) => {
                 }
             });
 
-            const pdfBuffer = await generatePDF({ html });
+            const pdfBuffer = await pdfgen.generatePDF({ html });
 
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', 'attachment; filename="report.pdf"');
