@@ -166,10 +166,10 @@ app.get('/downloaduser/:group', async (req, res) => {
     const def = getBase64Image('/uploads/srm.png');
     const group = req.params.group;
     let count = await User.countDocuments();
-    console.log(count, count/2);
     let users = [];
-    if (group==1) {
+    if (group == 1) {
         users = await User.find().limit(Math.ceil(count/2));
+        // users = await User.find().limit(3);
         console.log(users.length, '1111');
     } else {
         users = await User.find().skip(Math.ceil(count/2));
