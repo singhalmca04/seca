@@ -9,14 +9,8 @@ let transporter = nodemailer.createTransport({
 });
 
 exports.sendMail = (mailOptions) => {
-    let mailOptions1 = {
-        from: 'singhalmca04@gmail.com',
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-        text: mailOptions.body
-    };
     console.log(mailOptions, 'mailoptions')
-    transporter.sendMail(mailOptions1, function (error, info) {
+    transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
             console.log(error);
         } else {

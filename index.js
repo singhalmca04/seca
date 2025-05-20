@@ -77,7 +77,7 @@ app.delete("/delete/:id", async (req, res) => {
 app.put("/update/:id", async (req, res) => {
     try {
         const { name, regno, semester, section, batch, subcode } = req.body;
-        let result = await User.findOneAndUpdate({ _id: req.params.id }, { $set: { name, regno, semester, section, batch, subcode: subcode[0].split(',').map(code => code.trim()) } });
+        let result = await User.findOneAndUpdate({ _id: req.params.id }, { $set: { name, regno, semester, section, batch, subcode: subcode.split(',').map(code => code.trim()) } });
         res.status(200).send({ data: result });
     } catch (err) {
         console.log(err);
@@ -168,11 +168,11 @@ app.get('/downloaduser/:group', async (req, res) => {
     let count = await User.countDocuments();
     let users = [];
     if (group == 1) {
-        users = await User.find().limit(Math.ceil(count/2));
+        users = await User.find().limit(Math.ceil(count / 2));
         // users = await User.find().limit(3);
         console.log(users.length, '1111');
     } else {
-        users = await User.find().skip(Math.ceil(count/2));
+        users = await User.find().skip(Math.ceil(count / 2));
         console.log(users.length, '2222');
     }
     if (users && users.length) {
@@ -365,9 +365,28 @@ app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
     }
 });
 
-app.post("/send/mail", async (req, res) => {
+
+const uploadmail = multer({ storage: multer.memoryStorage() });
+app.post("/send/mail", uploadmail.array('attachments'), async (req, res) => {
     try {
-        const result = mail.sendMail(req.body);
+        const { to, subject, text } = req.body;
+
+        if (!to || !subject || !text) {
+            return res.status(400).send('Missing required fields');
+        }
+        const attachments = req.files.map(file => ({
+            filename: file.originalname,
+            content: file.buffer,
+            contentType: file.mimetype
+        }));
+        const mailOptions = {
+            from: 'singhalmca04@gmail.com',
+            to,
+            subject,
+            text,
+            attachments
+        };
+        mail.sendMail(mailOptions);
         res.status(200).send({ data: "Mail Send Sucessfully" });
     } catch (err) {
         console.log(err);
