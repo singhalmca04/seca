@@ -371,7 +371,7 @@ app.post("/send/mail", uploadmail.array('attachments'), async (req, res) => {
     try {
         const { to, subject, text } = req.body;
 
-        if (!to || !subject || !text) {
+        if (!to || !subject) {
             return res.status(400).send('Missing required fields');
         }
         const attachments = req.files.map(file => ({
@@ -394,8 +394,6 @@ app.post("/send/mail", uploadmail.array('attachments'), async (req, res) => {
     }
 })
 
-// const storage2 = multer.memoryStorage();
-// const upload2 = multer({ storage2 });
 const upload2 = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 40 * 1024 * 1024 } // 40 MB
