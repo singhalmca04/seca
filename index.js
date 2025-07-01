@@ -39,28 +39,12 @@ app.get('/deleteall', async (req, res) => {
     }
 });
 
-app.get('/deleteall/students', async (req, res) => {
+app.get('/deleteall/ie', async (req, res) => {
     try {
         const u = await Student.deleteMany({});
         res.status(200).send({ data: u });
     } catch (err) {
         res.status(500).send({ error: err });
-    }
-});
-
-app.post("/save", async (req, res) => {
-    try {
-        let user = new User();
-        const { regno, name, marks } = req.body;
-        user.regno = regno;
-        user.name = name;
-        user.marks = marks;
-        await user.save();
-        let userData = await User.find().limit(100);
-        res.status(200).send({ data: userData });
-    } catch (err) {
-        console.log(err);
-        res.status(500).send("Some Error");
     }
 });
 
@@ -85,43 +69,42 @@ app.put("/update/:id", async (req, res) => {
     }
 });
 
-app.put("/save/student", async (req, res) => {
+app.post("/finduser", async (req, res) => {
     try {
-        let student = new Student();
-        const { name, aadhar, address } = req.body;
-        let u = await User.findOne({ name }, { _id: 1 });
-        student.user = u._id;
-        student.aadhar = aadhar;
-        student.name = name;
-        student.address = address;
-        student = await student.save();
-        res.status(200).send({ data: student });
-    } catch (err) {
-        console.log(err);
-        res.status(500).send("Some Error");
-    }
-});
-
-app.get("/finduser", async (req, res) => {
-    try {
-        let user = await User.find();
-        // let sum = 0;
-        // user.map((u) => {
-        //     sum += u.marks;
-        // })
-        // let average = sum / user.length;
-        res.status(200).send({ data: user });
-    } catch (err) {
-        console.log(err);
-        res.status(500).send("Some Error");
-    }
-})
-
-app.post("/update/user", async (req, res) => {
-    try {
-        const { name, marks } = req.body;
-        let user = await User.updateOne({ name: name }, { $set: { marks: marks } });
-        res.status(200).send({ data: user });
+        const {branch, specialization, semester, section} = req.body;
+        let spec = [], sem = [], sec = [], user = [];
+        let query = {};
+        query.$and = [];
+        if (branch !== "") {
+            if (!query.$and) {
+                query.$and = [];
+            }
+            query.$and.push({ branch });
+            spec = await User.distinct("specialization", query);
+        }
+        if (specialization !== "") {
+            if (!query.$and) {
+                query.$and = [];
+            }
+            query.$and.push({ specialization });
+            sem = await User.distinct("semester", query);
+        }
+        if (semester !== "") {
+            if (!query.$and) {
+                query.$and = [];
+            }
+            query.$and.push({ semester });
+            sec = await User.distinct("section", query);
+        }
+        if (section !== "") {
+            if (!query.$and) {
+                query.$and = [];
+            }
+            query.$and.push({ section });
+            user = await User.find(query);
+        }
+        // let user = await User.find();
+        res.status(200).send({ data: {specialization: spec, semester: sem, section: sec, user} });
     } catch (err) {
         console.log(err);
         res.status(500).send("Some Error");
@@ -160,23 +143,24 @@ const getBase64FromUrl = async (imageUrl) => {
     return `data:${mimeType};base64,${base64}`;
 };
 
-app.get('/downloaduser/:group', async (req, res) => {
+app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async (req, res) => {
     const srmlogo = getBase64Image('/uploads/srm-logo.png');
     const srm = getBase64Image('/uploads/srm.png');
-    const def = getBase64Image('/uploads/srm.png');
-    const group = req.params.group;
-    let count = await User.countDocuments();
+    const def = getBase64Image('/uploads/test1.jpg');
+    const {branch, specialization, semester, section, group} = req.params;
+    // console.log(req.params, 'params');
+    let query = {branch, specialization, semester, section}
+    let count = await User.countDocuments(query);
     let users = [];
     if (group == 1) {
-        users = await User.find().limit(Math.ceil(count / 2));
+        users = await User.find(query).limit(Math.ceil(count / 2)).sort({regno : 1});
         // users = await User.find().limit(3);
-        console.log(users.length, '1111');
     } else {
-        users = await User.find().skip(Math.ceil(count / 2));
-        console.log(users.length, '2222');
+        users = await User.find(query).skip(Math.ceil(count / 2)).sort({regno : 1});
     }
     if (users && users.length) {
-        let ieDetails = await Student.find({ semester: users[0].semester, batch: users[0].batch }).sort({ examdate: 1 })
+        let ieDetails = await Student.find({ semester, batch: users[0].batch }).sort({ examdate: 1 });
+        if(!ieDetails.length) return res.status(200).send({data: 'IE Details Not Found', code: 2});
         const userWithSubject = await Promise.all(users.map(async (user) => {
             const img = user.image ? await getBase64FromUrl(user.image) : def;
 
@@ -201,28 +185,6 @@ app.get('/downloaduser/:group', async (req, res) => {
             };
         }));
 
-        // Read HTML template
-        // const html = fs.readFileSync(path.join(__dirname, '/templates/user.html'), 'utf8');
-        // const options = {
-        //     format: 'A4',
-        //     orientation: 'portrait',
-        //     border: '10mm',
-        // };
-        let userData = {
-            user: JSON.parse(JSON.stringify(userWithSubject))
-        }
-        // const document = {
-        //     html: html,
-        //     data: {
-        //         uData: userData,
-        //         srmlogo: getBase64Image('/uploads/srm-logo.png'),
-        //         srm: getBase64Image('/uploads/srm.png'),
-        //         image: getBase64Image('/uploads/test1.jpg')
-        //     },
-        //     path: './output.pdf',
-        //     type: '', // can be 'buffer' or 'stream'
-        // };
-        // res.status(200).send('No users found');
         try {
             const templateSource = fs.readFileSync(path.resolve('./templates/user.html'), 'utf8');
             const template = Handlebars.compile(templateSource);
@@ -317,7 +279,13 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
             if (x.subcode6) {
                 subcode.push(x.subcode6);
             }
-            await User.insertOne({ name: x.Name, regno: x["Reg No"], semester: x.semester, section: x.section, batch: x.batch, subcode });
+            if (x.subcode7) {
+                subcode.push(x.subcode7);
+            }
+            if (x.subcode8) {
+                subcode.push(x.subcode8);
+            }
+            await User.insertOne({ name: x.Name, regno: x["Reg No"], semester: x.semester, section: x.section, branch: x.branch, specialization: x. specialization, batch: x.batch, subcode });
             next();
         }, async function (err) {
             if (err) {
@@ -340,7 +308,7 @@ app.post('/uploadexcelie', uploadx.single('file'), (req, res) => {
     const data = xlsx.utils.sheet_to_json(sheet); // Convert sheet to JSON
     if (data.length) {
         asyncLoop(data, async function (x, next) {
-            await Student.insertOne({ ie: x.ie, month: x["month"], year: x.year, program: x.program, semester: x.semester, section: x.section, batch: x.batch, subcode: x.subcode, subject: x.subject, examdate: x.examdate, session: x.session });
+            await Student.insertOne({ ie: x.ie, month: x["month"], year: x.year, program: x.program, semester: x.semester, specialization: x.specialization, batch: x.batch, subcode: x.subcode, subject: x.subject, examdate: x.examdate, session: x.session });
             next();
         }, async function (err) {
             if (err) {
@@ -366,25 +334,24 @@ app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
 });
 
 
-const uploadmail = multer({ storage: multer.memoryStorage() });
-app.post("/send/mail", uploadmail.array('attachments'), async (req, res) => {
+app.post("/send/mail", async (req, res) => {
     try {
-        const { to, subject, text } = req.body;
+        const { to, subject, text, attachments } = req.body;
 
-        if (!to || !subject) {
+        if (!to || !subject || !attachments) {
             return res.status(400).send('Missing required fields');
         }
-        const attachments = req.files.map(file => ({
-            filename: file.originalname,
-            content: file.buffer,
-            contentType: file.mimetype
-        }));
+        const html = `<p>${text}</p>
+            <ul>
+            ${attachments.map(att => `<li><a href="${att.url}">${att.filename}</a></li>`).join('')}
+            </ul>
+        `;
         const mailOptions = {
             from: 'singhalmca04@gmail.com',
             to,
             subject,
             text,
-            attachments
+            html
         };
         mail.sendMail(mailOptions);
         res.status(200).send({ data: "Mail Send Sucessfully" });

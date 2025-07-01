@@ -7,7 +7,7 @@ const StudentSchema = new Schema({
     month: {type: String, default: ''},
     year: {type: String, default: ''},
     program: {type: String, default: ''},
-    section: {type: String, default: ''},
+    specialization: {type: String, default: ''},
     semester: {type: String, default: ''},
     subcode: {type: String, default: ''},
     subject: {type: String, default: ''},

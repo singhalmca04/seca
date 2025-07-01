@@ -14,7 +14,7 @@ const generatePDF = async ({ html, pdfOptions = {}, browserWSEndpoint }) => {
   }
 
   const browser = await puppeteer.connect({
-    browserWSEndpoint: browserWSEndpoint || 'wss://chrome.browserless.io?token=2SJbs4OartWOV6u259b231a8f77e604a4b012fcb80b3d8d96'
+    browserWSEndpoint: browserWSEndpoint || 'wss://chrome.browserless.io?token=1SJbs4OartWOV6ua2727fe34ed4890205cb785444d5335282'
   });
 
   const page = await browser.newPage();
