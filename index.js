@@ -58,6 +58,16 @@ app.delete("/delete/:id", async (req, res) => {
     }
 });
 
+app.delete("/deleteie/:id", async (req, res) => {
+    try {
+        let result = await Student.findByIdAndDelete(req.params.id);
+        res.status(200).send({ data: result });
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Some Error");
+    }
+});
+
 app.put("/update/:id", async (req, res) => {
     try {
         const { name, regno, semester, section, batch, subcode } = req.body;
