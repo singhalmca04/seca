@@ -285,7 +285,7 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
             if (x.subcode8) {
                 subcode.push(x.subcode8);
             }
-            await User.insertOne({ name: x.Name, regno: x["Reg No"], semester: x.semester, section: x.section, branch: x.branch, specialization: x. specialization, batch: x.batch, subcode });
+            await User.insertOne({ name: x.Name, regno: x["Reg No"], semester: x.semester, section: x.section, branch: x.branch, specialization: x.specialization, batch: x.batch, subcode });
             next();
         }, async function (err) {
             if (err) {
@@ -315,11 +315,12 @@ app.post('/uploadexcelie', uploadx.single('file'), (req, res) => {
             if (err) {
 
             } else {
-
+                return res.json({ success: true, data });
             }
         });
+    } else {
+        return res.json({ success: true, data : "Not found" });
     }
-    return res.json({ success: true, data });
 });
 
 // API route for uploading
