@@ -170,7 +170,7 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
     }
     if (users && users.length) {
         let ieDetails = await Student.find({ semester, batch: users[0].batch }).sort({ examdate: 1 });
-        if(!ieDetails.length) return res.status(200).send({data: 'IE Details Not Found', code: 2});
+        if(!ieDetails.length) return res.status(204).send();
         const userWithSubject = await Promise.all(users.map(async (user) => {
             const img = user.image ? await getBase64FromUrl(user.image) : def;
 
@@ -215,7 +215,7 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
             res.status(500).send('PDF generation failed');
         }
     } else {
-        res.status(200).send('No users found');
+        res.status(204).send();
     }
 });
 
