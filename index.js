@@ -336,8 +336,8 @@ app.post('/uploadexcelie', uploadx.single('file'), (req, res) => {
 // API route for uploading
 app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
     try {
-        await User.findOneAndUpdate({ _id: req.params.id }, { $set: { image: imageUrl } })
-        res.json({ message: 'Image uploaded successfully!', filePath: imageUrl });
+        await User.findOneAndUpdate({ _id: req.params.id }, { $set: { image: req.body.imageUrl } })
+        res.json({ message: 'Image uploaded successfully!', filePath: req.body.imageUrl });
     } catch (error) {
         logger.error("error in catch " + error);
         console.error(error);
