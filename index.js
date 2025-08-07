@@ -289,13 +289,14 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
             next();
         }, async function (err) {
             if (err) {
-
+                return res.json({ success: true, data: "Error " + err });        
             } else {
-
+                return res.json({ success: true, data });
             }
         });
+    } else {
+        return res.json({ success: true, data: "No data found" });
     }
-    return res.json({ success: true, data });
 });
 
 app.post('/uploadexcelie', uploadx.single('file'), (req, res) => {
