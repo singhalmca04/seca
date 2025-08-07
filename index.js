@@ -71,7 +71,15 @@ app.delete("/deleteie/:id", async (req, res) => {
 app.put("/update/:id", async (req, res) => {
     try {
         const { name, regno, semester, section, batch, subcode } = req.body;
-        let result = await User.findOneAndUpdate({ _id: req.params.id }, { $set: { name, regno, semester, section, batch, subcode: subcode.split(',').map(code => code.trim()) } });
+        let result = await User.findOneAndUpdate({ _id: req.params.id }, {
+            $set: {
+                name, regno, semester, section, batch, subcode: typeof subcode === 'string'
+                    ? subcode.split(',').map(code => code.trim())
+                    : Array.isArray(subcode)
+                        ? subcode.map(code => code.trim())
+                        : []
+            }
+        });
         res.status(200).send({ data: result });
     } catch (err) {
         console.log(err);
@@ -81,7 +89,7 @@ app.put("/update/:id", async (req, res) => {
 
 app.post("/finduser", async (req, res) => {
     try {
-        const {branch, specialization, semester, section} = req.body;
+        const { branch, specialization, semester, section } = req.body;
         let spec = [], sem = [], sec = [], user = [];
         let query = {};
         query.$and = [];
@@ -114,7 +122,7 @@ app.post("/finduser", async (req, res) => {
             user = await User.find(query);
         }
         // let user = await User.find();
-        res.status(200).send({ data: {specialization: spec, semester: sem, section: sec, user} });
+        res.status(200).send({ data: { specialization: spec, semester: sem, section: sec, user } });
     } catch (err) {
         console.log(err);
         res.status(500).send("Some Error");
@@ -157,20 +165,20 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
     const srmlogo = getBase64Image('/uploads/srm-logo.png');
     const srm = getBase64Image('/uploads/srm.png');
     const def = getBase64Image('/uploads/test1.jpg');
-    const {branch, specialization, semester, section, group} = req.params;
+    const { branch, specialization, semester, section, group } = req.params;
     // console.log(req.params, 'params');
-    let query = {branch, specialization, semester, section}
+    let query = { branch, specialization, semester, section }
     let count = await User.countDocuments(query);
     let users = [];
     if (group == 1) {
-        users = await User.find(query).limit(Math.ceil(count / 2)).sort({regno : 1});
+        users = await User.find(query).limit(Math.ceil(count / 2)).sort({ regno: 1 });
         // users = await User.find().limit(3);
     } else {
-        users = await User.find(query).skip(Math.ceil(count / 2)).sort({regno : 1});
+        users = await User.find(query).skip(Math.ceil(count / 2)).sort({ regno: 1 });
     }
     if (users && users.length) {
         let ieDetails = await Student.find({ semester, batch: users[0].batch }).sort({ examdate: 1 });
-        if(!ieDetails.length) return res.status(204).send();
+        if (!ieDetails.length) return res.status(204).send();
         const userWithSubject = await Promise.all(users.map(async (user) => {
             const img = user.image ? await getBase64FromUrl(user.image) : def;
 
@@ -281,25 +289,25 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
     if (data.length) {
         asyncLoop(data, async function (x, next) {
             let subcode = [];
-            subcode.push(x.subcode1);
-            subcode.push(x.subcode2);
-            subcode.push(x.subcode3);
-            subcode.push(x.subcode4);
-            subcode.push(x.subcode5);
+            subcode.push(x.subcode1?.trim());
+            subcode.push(x.subcode2?.trim());
+            subcode.push(x.subcode3?.trim());
+            subcode.push(x.subcode4?.trim());
+            subcode.push(x.subcode5?.trim());
             if (x.subcode6) {
-                subcode.push(x.subcode6);
+                subcode.push(x.subcode6?.trim());
             }
             if (x.subcode7) {
-                subcode.push(x.subcode7);
+                subcode.push(x.subcode7?.trim());
             }
             if (x.subcode8) {
-                subcode.push(x.subcode8);
+                subcode.push(x.subcode8?.trim());
             }
-            await User.insertOne({ name: x.Name, regno: x["Reg No"], semester: x.semester, section: x.section, branch: x.branch, specialization: x.specialization, batch: x.batch, subcode });
+            await User.insertOne({ name: x.Name?.trim(), regno: x["Reg No"]?.trim(), semester: x.semester?.trim(), section: x.section?.trim(), branch: x.branch?.trim(), specialization: x.specialization?.trim(), batch: x.batch?.trim(), subcode });
             next();
         }, async function (err) {
             if (err) {
-                return res.json({ success: true, data: "Error " + err });        
+                return res.json({ success: true, data: "Error " + err });
             } else {
                 return res.json({ success: true, data });
             }
@@ -329,7 +337,7 @@ app.post('/uploadexcelie', uploadx.single('file'), (req, res) => {
             }
         });
     } else {
-        return res.json({ success: true, data : "Not found" });
+        return res.json({ success: true, data: "Not found" });
     }
 });
 
@@ -408,9 +416,9 @@ app.post('/upload/image/path', async (req, res) => {
         if (user) {
             user.image = imageUrl;
             await user.save();
-            res.send({ message: 'Images uploaded successfully.' });
+            res.status(200).send({ message: 'Images uploaded successfully.' });
         } else {
-            res.send({ message: 'Error in uploading' });
+            res.status(200).send({ message: 'Error in uploading' });
         }
     } catch (err) {
         console.log(err);
