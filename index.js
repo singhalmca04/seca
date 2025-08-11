@@ -418,7 +418,7 @@ app.post("/send/mail", async (req, res) => {
                 text
             };
         }
-        mail.sendMail(mailOptions);
+        await mail.sendMail(mailOptions);
         res.status(200).send({ data: "Mail Send Sucessfully" });
     } catch (err) {
         console.log(err);

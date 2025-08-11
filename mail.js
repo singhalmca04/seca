@@ -21,12 +21,13 @@
 import nodemailer from "nodemailer";
 
 export async function sendMail(mailOptions) {
-  const { to, subject, text } = mailOptions;
+  const { to, subject, text, html } = mailOptions;
 
   try {
     const transporter = nodemailer.createTransport({
       host: "smtp-relay.brevo.com",
       port: 587,
+      secure: false,
       auth: {
         user: process.env.SENDINBLUE_USER,
         pass: process.env.SENDINBLUE_PASS
@@ -37,9 +38,11 @@ export async function sendMail(mailOptions) {
       from: `"My App" <${process.env.SENDINBLUE_USER}>`,
       to,
       subject,
-      text
+      text,
+      html
     });
     console.log("Email sent: " + info.messageId);
+    return info;
   } catch (error) {
     console.log(error.message);
   }
