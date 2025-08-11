@@ -18,23 +18,50 @@
 //     });
 // }
 
-import { Resend } from 'resend';
-// const Resend = require('resend');
-
-const resend = new Resend('re_16u1Zpt9_JLHkFqs7emBo9Wd6qM5dXK72');
+import nodemailer from "nodemailer";
 
 export async function sendMail(mailOptions) {
   const { to, subject, text } = mailOptions;
+
   try {
-    const data = await resend.emails.send({
-      from: 'onboarding@resend.dev', // Use your verified domain or 'resend.dev'
-      to: [to],
-      subject: subject,
-      text: text
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
     });
-    console.log('Email sent: ' + data);
-    
+
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to,
+      subject,
+      text
+    });
+
+    console.log('Email sent: ' + info.response);
   } catch (error) {
-    console.error(error);
+    console.log(error.message);
   }
 }
+
+
+// import { Resend } from 'resend';
+
+// const resend = new Resend('re_16u1Zpt9_JLHkFqs7emBo9Wd6qM5dXK72');
+
+// export async function sendMail(mailOptions) {
+//   const { to, subject, text } = mailOptions;
+//   try {
+//     const data = await resend.emails.send({
+//       from: 'onboarding@resend.dev', // Use your verified domain or 'resend.dev'
+//       to: [to],
+//       subject: subject,
+//       text: text
+//     });
+//     console.log('Email sent: ' + data);
+    
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
