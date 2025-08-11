@@ -177,7 +177,7 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
         users = await User.find(query).skip(Math.ceil(count / 2)).sort({ regno: 1 });
     }
     if (users && users.length) {
-        let ieDetails = await Student.find({ semester, batch: users[0].batch, specialization  }).sort({ examdate: 1 });
+        let ieDetails = await Student.find({ semester, batch: users[0].batch, specialization }).sort({ examdate: 1 });
         if (!ieDetails.length) return res.status(204).send();
         const userWithSubject = await Promise.all(users.map(async (user) => {
             const img = user.image ? await getBase64FromUrl(user.image) : def;
@@ -357,23 +357,35 @@ app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
 app.post("/send/mail", async (req, res) => {
     try {
         const { to, subject, text, attachments } = req.body;
-
-        if (!to || !subject || !attachments) {
+        console.log(1)
+        let mailOptions;
+        if (!to || !subject || !text) {
             return res.status(400).send('Missing required fields');
         }
-        const html = `<p>${text}</p>
+        if (attachments && attachments.length) {
+            const html = `<p>${text}</p>
             <ul>
             ${attachments.map(att => `<li><a href="${att.url}">${att.filename}</a></li>`).join('')}
             </ul>
         `;
-        const mailOptions = {
-            from: 'singhalmca04@gmail.com',
-            to,
-            subject,
-            text,
-            html
-        };
+            mailOptions = {
+                from: 'singhalmca04@gmail.com',
+                to,
+                subject,
+                text,
+                html
+            };
+        } else {
+            mailOptions = {
+                from: 'singhalmca04@gmail.com',
+                to,
+                subject,
+                text
+            };
+        }
+        console.log(2)
         mail.sendMail(mailOptions);
+        console.log(3)
         res.status(200).send({ data: "Mail Send Sucessfully" });
     } catch (err) {
         console.log(err);
