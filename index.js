@@ -87,6 +87,23 @@ app.put("/update/:id", async (req, res) => {
     }
 });
 
+app.put("/updateie/:id", async (req, res) => {
+    try {
+        const { ie, month, year, program, specialization,
+            semester, subcode, subject, examdate, session, batch } = req.body;
+        let result = await Student.findOneAndUpdate({ _id: req.params.id }, {
+            $set: {
+                ie, month, year, program, specialization,
+                semester, subcode, subject, examdate, session, batch
+            }
+        });
+        res.status(200).send({ data: result });
+    } catch (err) {
+        console.log(err);
+        res.status(500).send("Some Error");
+    }
+});
+
 app.post("/finduser", async (req, res) => {
     try {
         const { branch, specialization, semester, section } = req.body;
@@ -303,7 +320,16 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
             if (x.subcode8) {
                 subcode.push(x.subcode8?.trim());
             }
-            await User.insertOne({ name: x.Name?.trim(), regno: x["Reg No"]?.trim(), semester: x.semester?.trim(), section: x.section?.trim(), branch: x.branch?.trim(), specialization: x.specialization?.trim(), batch: x.batch?.trim(), subcode });
+            await User.insertOne({
+                name: x.Name?.trim().toUpperCase(),
+                regno: x["Reg No"]?.trim().toUpperCase(),
+                semester: x.semester?.trim().toUpperCase(),
+                section: x.section?.trim().toUpperCase(),
+                branch: x.branch?.trim().toUpperCase(),
+                specialization: x.specialization?.trim().toUpperCase(),
+                batch: x.batch?.trim(),
+                subcode: subcode?.trim().toUpperCase()
+            });
             next();
         }, async function (err) {
             if (err) {
@@ -327,7 +353,19 @@ app.post('/uploadexcelie', uploadx.single('file'), (req, res) => {
     const data = xlsx.utils.sheet_to_json(sheet); // Convert sheet to JSON
     if (data.length) {
         asyncLoop(data, async function (x, next) {
-            await Student.insertOne({ ie: x.ie, month: x["month"], year: x.year, program: x.program, semester: x.semester, specialization: x.specialization, batch: x.batch, subcode: x.subcode, subject: x.subject, examdate: x.examdate, session: x.session });
+            await Student.insertOne({
+                ie: x.ie?.trim().toUpperCase(),
+                month: x["month"]?.trim().toUpperCase(),
+                year: x.year?.toString().trim(),
+                program: x.program?.trim().toUpperCase(),
+                semester: x.semester?.trim().toUpperCase(),
+                specialization: x.specialization?.trim().toUpperCase(),
+                batch: x.batch?.trim(),
+                subcode: x.subcode?.trim().toUpperCase(),
+                subject: x.subject?.trim().toUpperCase(),
+                examdate: x.examdate?.trim(),
+                session: x.session?.trim().toUpperCase()
+            });
             next();
         }, async function (err) {
             if (err) {
