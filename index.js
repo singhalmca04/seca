@@ -357,7 +357,6 @@ app.post('/uploadpics/:id', upload.single('image'), async (req, res) => {
 app.post("/send/mail", async (req, res) => {
     try {
         const { to, subject, text, attachments } = req.body;
-        console.log(1)
         let mailOptions;
         if (!to || !subject || !text) {
             return res.status(400).send('Missing required fields');
@@ -369,7 +368,6 @@ app.post("/send/mail", async (req, res) => {
             </ul>
         `;
             mailOptions = {
-                from: 'singhalmca04@gmail.com',
                 to,
                 subject,
                 text,
@@ -377,15 +375,12 @@ app.post("/send/mail", async (req, res) => {
             };
         } else {
             mailOptions = {
-                from: 'singhalmca04@gmail.com',
                 to,
                 subject,
                 text
             };
         }
-        console.log(2)
         mail.sendMail(mailOptions);
-        console.log(3)
         res.status(200).send({ data: "Mail Send Sucessfully" });
     } catch (err) {
         console.log(err);
