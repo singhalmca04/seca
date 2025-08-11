@@ -25,21 +25,21 @@ export async function sendMail(mailOptions) {
 
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp-relay.brevo.com",
+      port: 587,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.SENDINBLUE_USER,
+        pass: process.env.SENDINBLUE_PASS
       }
     });
 
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `"My App" <${process.env.SENDINBLUE_USER}>`,
       to,
       subject,
       text
     });
-
-    console.log('Email sent: ' + info.response);
+    console.log("Email sent: " + info.messageId);
   } catch (error) {
     console.log(error.message);
   }
