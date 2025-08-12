@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const cors = require("cors");
 const asyncLoop = require('node-async-loop');
 app.use(cors()); // Allows all origins (not recommended for production)
+import nodemailer from "nodemailer";
 
 const fs = require('fs');
 const path = require('path');
@@ -468,6 +469,42 @@ app.post('/upload/image/path', async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).send("Error in uploading " + err);
+    }
+});
+
+app.post('/api/test-mail', async (req, res) => {
+    try {
+        const { to } = req.body;
+
+        if (!to) {
+            return res.status(400).json({ error: "Missing 'to' email" });
+        }
+
+        // Setup transporter with Brevo SMTP
+        const transporter = nodemailer.createTransport({
+            host: "smtp-relay.brevo.com",
+            port: 587,
+            secure: false, // Use true for port 465
+            auth: {
+                user: process.env.SENDINBLUE_USER, // Your Brevo email
+                pass: process.env.SENDINBLUE_PASS  // Your Brevo SMTP key
+            }
+        });
+
+        // Send test email
+        const info = await transporter.sendMail({
+            from: `"Test App" <${process.env.SENDINBLUE_USER}>`,
+            to,
+            subject: "Test Email from Vercel + Brevo",
+            text: "If you receive this, Brevo SMTP works in Vercel 🎉"
+        });
+
+        console.log("Message sent:", info.messageId);
+        res.status(200).json({ success: true, messageId: info.messageId });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
