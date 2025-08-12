@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const cors = require("cors");
 const asyncLoop = require('node-async-loop');
 app.use(cors()); // Allows all origins (not recommended for production)
-import nodemailer from "nodemailer";
+// import nodemailer from "nodemailer";
 
 const fs = require('fs');
 const path = require('path');
