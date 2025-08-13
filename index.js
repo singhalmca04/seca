@@ -489,7 +489,7 @@ app.post('/api/test-mail', async (req, res) => {
     });
 
     const info = await transporter.sendMail({
-      from: `"Test App" <${process.env.EMAIL_USER}>`,
+      from: `"SRM Hall Ticket" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       text
