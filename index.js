@@ -332,7 +332,7 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
                 branch: x.branch?.trim().toUpperCase(),
                 specialization: x.specialization?.trim().toUpperCase(),
                 batch: x.batch?.trim(),
-                subcode: subcode?.trim().toUpperCase()
+                subcode: subcode
             });
             next();
         }, async function (err) {
