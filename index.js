@@ -204,7 +204,6 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
             const personalSubjects = ieDetails.filter(sub =>
                 user.subcode.includes(sub.subcode)
             );
-
             return {
                 regno: user.regno,
                 name: user.name,
@@ -218,7 +217,7 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
                 srm,
                 specialization,
                 branch,
-                isBtech: ieDetails[0].program === 'B.Tech' ? true : false, 
+                isBtech: ieDetails[0].program == 'B.TECH' ? true : false, 
                 ieData: ieDetails[0],  // Optional: general info
                 ieDetails: personalSubjects, // 👈 only student's subjects
             };
