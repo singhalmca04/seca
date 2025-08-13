@@ -473,39 +473,32 @@ app.post('/upload/image/path', async (req, res) => {
 });
 
 app.post('/api/test-mail', async (req, res) => {
-    try {
-        const { to } = req.body;
+    const { to, subject, text } = req.body;
 
-        if (!to) {
-            return res.status(400).json({ error: "Missing 'to' email" });
-        }
+  if (!to || !subject || !text) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
 
-        // Setup transporter with Brevo SMTP
-        const transporter = nodemailer.createTransport({
-            host: "smtp-relay.brevo.com",
-            port: 587,
-            secure: false, // Use true for port 465
-            auth: {
-                user: process.env.SENDINBLUE_USER, // Your Brevo email
-                pass: process.env.SENDINBLUE_PASS  // Your Brevo SMTP key
-            }
-        });
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: 'srmhallticket@gmail.com',
+        pass: 'bgjw bfan wglo dgjj' // Not your real password!
+      }
+    });
 
-        // Send test email
-        const info = await transporter.sendMail({
-            from: `"Test App" <${process.env.SENDINBLUE_USER}>`,
-            to,
-            subject: "Test Email from Vercel + Brevo",
-            text: "If you receive this, Brevo SMTP works in Vercel 🎉"
-        });
+    const info = await transporter.sendMail({
+      from: `"Test App" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      text
+    });
 
-        console.log("Message sent:", info.messageId);
-        res.status(200).json({ success: true, messageId: info.messageId });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, error: error.message });
-    }
+    res.status(200).json({ success: true, messageId: info.messageId });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 app.listen(4000, () => {
