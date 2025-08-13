@@ -126,7 +126,13 @@
                 </tr>
                 <tr>
                     <th>PROGRAM/SECTION</th>
-                    <td>:&nbsp;&nbsp; {{ieData.program}} - CSE/{{this.section}}</td>
+                    <td>:&nbsp;&nbsp;
+                        {{#if this.isBTech}}
+                            {{ieData.program}} - {{this.branch}} - {{this.specialization}}/{{this.section}}
+                        {{else}}
+                            {{this.branch}} - {{this.specialization}}/{{this.section}}
+                        {{/if}}
+                    </td>
                 </tr>
                 <tr>
                     <td></td>

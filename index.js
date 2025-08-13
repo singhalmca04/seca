@@ -195,7 +195,7 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
         users = await User.find(query).skip(Math.ceil(count / 2)).sort({ regno: 1 });
     }
     if (users && users.length) {
-        let ieDetails = await Student.find({ semester, batch: users[0].batch, specialization }).sort({ examdate: 1 });
+        let ieDetails = await Student.find({ semester, batch: users[0].batch, specialization, program: branch }).sort({ examdate: 1 });
         if (!ieDetails.length) return res.status(204).send();
         const userWithSubject = await Promise.all(users.map(async (user) => {
             const img = user.image ? await getBase64FromUrl(user.image) : def;
@@ -216,6 +216,9 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
                 sno: user.regno.substring(2),
                 srmlogo,
                 srm,
+                specialization,
+                branch,
+                isBtech: ieDetails[0].program === 'B.Tech.' ? true : false, 
                 ieData: ieDetails[0],  // Optional: general info
                 ieDetails: personalSubjects, // 👈 only student's subjects
             };
