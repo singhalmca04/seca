@@ -217,7 +217,8 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
                 srm,
                 specialization,
                 branch,
-                isBtech: ieDetails[0].program == 'B.TECH' ? true : false, 
+                isBtech: ieDetails[0].program == 'B.TECH' ? true : false,
+                isNotCore: specialization == 'CORE' ? false : true, 
                 ieData: ieDetails[0],  // Optional: general info
                 ieDetails: personalSubjects, // 👈 only student's subjects
             };
