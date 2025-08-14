@@ -92,6 +92,10 @@
             margin: 5mm 10mm 1mm 10mm;
             /* top, right, bottom, left */
         }
+
+        .exam-table th.exam-date {
+            white-space: nowrap;
+        }
     </style>
 </head>
 
@@ -128,9 +132,10 @@
                     <th>PROGRAM/SECTION</th>
                     <td>:&nbsp;&nbsp;
                         {{#if this.isBtech}}
-                            {{ieData.program}} - {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
+                        {{ieData.program}} - {{this.branch}}{{#if this.isNotCore}} -
+                        {{this.specialization}}{{/if}}/{{this.section}}
                         {{else}}
-                            {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
+                        {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
                         {{/if}}
                     </td>
                 </tr>
@@ -146,7 +151,7 @@
                     <th>SEMESTER</th>
                     <th>SUB. CODE</th>
                     <th>SUBJECT</th>
-                    <th>DATE OF EXAM</th>
+                    <th class="exam-date">{{examdate}}</th>
                     <th>SESSION</th>
                 </tr>
                 {{#each ieDetails}}
