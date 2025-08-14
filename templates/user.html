@@ -128,9 +128,9 @@
                     <th>PROGRAM/SECTION</th>
                     <td>:&nbsp;&nbsp;
                         {{#if this.isBtech}}
-                            {{ieData.program}} - {{this.branch}} - {{#if this.isNotCore}}{{this.specialization}}{{/if}}/{{this.section}}
+                            {{ieData.program}} - {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
                         {{else}}
-                            {{this.branch}} - {{#if this.isNotCore}}{{this.specialization}}{{/if}}/{{this.section}}
+                            {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
                         {{/if}}
                     </td>
                 </tr>
