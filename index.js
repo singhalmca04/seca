@@ -486,8 +486,8 @@ app.post('/api/test-mail', async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: 'srmhallticket@gmail.com',
-        pass: 'bgjw bfan wglo dgjj' // Not your real password!
+        user: 'singhalmca04@gmail.com',
+        pass: 'czef vqub zzld rwbd' // Not your real password!
       }
     });
 
