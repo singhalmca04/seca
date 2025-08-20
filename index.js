@@ -204,6 +204,7 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
             const personalSubjects = ieDetails.filter(sub =>
                 user.subcode.includes(sub.subcode)
             );
+            ieDetails[0].month = ieDetails[0].month.charAt(0).toUpperCase() + ieDetails[0].month.slice(1).toLowerCase();
             return {
                 regno: user.regno,
                 name: user.name,
@@ -359,7 +360,7 @@ app.post('/uploadexcelie', uploadx.single('file'), (req, res) => {
         asyncLoop(data, async function (x, next) {
             await Student.insertOne({
                 ie: x.ie?.trim().toUpperCase(),
-                month: x["month"]?.trim().toUpperCase(),
+                month: x["month"]?.trim(),
                 year: x.year?.toString().trim(),
                 program: x.program?.trim().toUpperCase(),
                 semester: x.semester?.trim().toUpperCase(),
