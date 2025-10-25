@@ -137,7 +137,7 @@ app.post("/finduser", async (req, res) => {
                 query.$and = [];
             }
             query.$and.push({ section });
-            user = await User.find(query);
+            user = await User.find(query).sort({ regno: 1 });
         }
         // let user = await User.find();
         res.status(200).send({ data: { specialization: spec, semester: sem, section: sec, user } });
@@ -149,7 +149,7 @@ app.post("/finduser", async (req, res) => {
 
 app.get("/findstudents", async (req, res) => {
     try {
-        let data = await Student.find();
+        let data = await Student.find().sort({ semester: 1 });
         res.status(200).send({ data: data });
     } catch (err) {
         console.log(err + "error");
