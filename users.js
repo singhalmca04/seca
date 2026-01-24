@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const timestamps = require('mongoose-timestamps');
 
 const UserSchema = new Schema({
-    regno: {type: String, default: ''},
+    regno: {type: String, default: '', unique: true},
     name: {type: String, default: ''},
     branch: {type: String, default: ''},
     specialization: {type: String, default: ''},

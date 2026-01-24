@@ -42,7 +42,7 @@ app.get('/deleteall', async (req, res) => {
 
 app.get('/deleteall/:semester/:specialization/:section', async (req, res) => {
     try {
-        const u = await User.deleteMany({specialization: req.params.specialization, semester: req.params.semester, section: req.params.section});
+        const u = await User.deleteMany({ specialization: req.params.specialization, semester: req.params.semester, section: req.params.section });
         res.status(200).send({ data: u });
     } catch (err) {
         res.status(500).send({ error: err });
@@ -228,7 +228,7 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
                 specialization,
                 branch,
                 isBtech: ieDetails[0].program == 'B.TECH' ? true : false,
-                isNotCore: specialization == 'CORE' ? false : true, 
+                isNotCore: specialization == 'CORE' ? false : true,
                 ieData: ieDetails[0],  // Optional: general info
                 ieDetails: personalSubjects, // 👈 only student's subjects
             };
@@ -334,16 +334,34 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
             if (x.subcode8) {
                 subcode.push(x.subcode8?.trim());
             }
-            await User.insertOne({
-                name: x.Name?.trim().toUpperCase(),
-                regno: x["Reg No"]?.trim().toUpperCase(),
-                semester: x.semester?.trim().toUpperCase(),
-                section: x.section?.trim().toUpperCase(),
-                branch: x.branch?.trim().toUpperCase(),
-                specialization: x.specialization?.trim().toUpperCase(),
-                batch: x.batch?.trim(),
-                subcode: subcode
-            });
+
+            // await User.insertOne({
+            //     name: x.Name?.trim().toUpperCase(),
+            //     regno: x["Reg No"]?.trim().toUpperCase(),
+            //     semester: x.semester?.trim().toUpperCase(),
+            //     section: x.section?.trim().toUpperCase(),
+            //     branch: x.branch?.trim().toUpperCase(),
+            //     specialization: x.specialization?.trim().toUpperCase(),
+            //     batch: x.batch?.trim(),
+            //     subcode: subcode
+            // });
+            await User.updateOne(
+                { regno: x["Reg No"]?.trim().toUpperCase() },   // condition
+                {
+                    $set: {
+                        subcode: subcode,
+                        semester: x.semester?.trim().toUpperCase()
+                    },
+                    $setOnInsert: {
+                        name: x.Name?.trim().toUpperCase(),
+                        section: x.section?.trim().toUpperCase(),
+                        branch: x.branch?.trim().toUpperCase(),
+                        specialization: x.specialization?.trim().toUpperCase(),
+                        batch: x.batch?.trim()
+                    }
+                },
+                { upsert: true }
+            );
             next();
         }, async function (err) {
             if (err) {
@@ -488,30 +506,30 @@ app.post('/upload/image/path', async (req, res) => {
 app.post('/api/test-mail', async (req, res) => {
     const { to, subject, text } = req.body;
 
-  if (!to || !subject || !text) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
+    if (!to || !subject || !text) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
 
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: 'singhalmca04@gmail.com',
-        pass: 'czef vqub zzld rwbd' // Not your real password!
-      }
-    });
+    try {
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: 'singhalmca04@gmail.com',
+                pass: 'czef vqub zzld rwbd' // Not your real password!
+            }
+        });
 
-    const info = await transporter.sendMail({
-      from: `"SRM Hall Ticket" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      text
-    });
+        const info = await transporter.sendMail({
+            from: `"SRM Hall Ticket" <${process.env.EMAIL_USER}>`,
+            to,
+            subject,
+            text
+        });
 
-    res.status(200).json({ success: true, messageId: info.messageId });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
+        res.status(200).json({ success: true, messageId: info.messageId });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 app.listen(4000, () => {
