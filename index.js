@@ -40,6 +40,15 @@ app.get('/deleteall', async (req, res) => {
     }
 });
 
+app.get('/deleteall/:semester/:specialization/:section', async (req, res) => {
+    try {
+        const u = await User.deleteMany({specialization: req.params.specialization, semester: req.params.semester, section: req.params.section});
+        res.status(200).send({ data: u });
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
+});
+
 app.get('/deleteall/ie', async (req, res) => {
     try {
         const u = await Student.deleteMany({});
