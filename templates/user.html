@@ -35,26 +35,11 @@
             font-size: 14px;
         }
 
-        .page-wrapper {
-            min-height: 100vh;
-            /* full page height */
-            display: flex;
-            flex-direction: column;
-        }
-
         .bottom-table {
-            flex: 1;
             border: 1px solid #000;
             padding: 8px;
             margin-top: 5px;
             font-size: 14px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .head-iec {
-            margin-top: auto;
-            text-align: center;
         }
 
         h2 {
@@ -120,7 +105,7 @@
     <div style="float: right;">
         <img src="{{this.srm}}" width="170px" height="80px" alt="SRM" />
     </div>
-    <div class="page-wrapper">
+    <div class="container-fluid" style="clear: both;">
         <div class="ie">Internal Examinations - {{ieData.ie}}, {{ieData.month}} {{ieData.year}}</div>
         <div class="ht">HALL TICKET</div>
         <p><strong>Serial No.: 26/{{this.sno}} </strong></p>
@@ -144,13 +129,13 @@
                 <tr>
                     <th>PROGRAM/SECTION</th>
                     <td>:&nbsp;&nbsp;
-                        {{#if this.isBtech}}
-                        {{ieData.program}} - {{this.branch}} {{#if this.isNotCore}} - {{this.specialization}}
+                    {{#if this.isBtech}}
+                        {{ieData.program}} - {{this.branch}}  {{#if this.isNotCore}} - {{this.specialization}}
                         {{/if}}
                         /{{this.section}}
-                        {{else}}
+                    {{else}}
                         {{this.branch}} / {{this.section}}
-                        {{/if}}
+                    {{/if}}
                         <!-- {{#if this.isBtech}}
                             {{ieData.program}} - {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
                         {{else}}
@@ -190,10 +175,7 @@
                 <p style="float: left;"><strong>SIGNATURE OF THE CANDIDATE</strong></p>
                 <p style="float: right;"><strong>CLASS MENTOR</strong></p>
             </div>
-            <!-- <div style="text-align: center; margin-top: 135px; bottom: 30px;">
-                <strong>HEAD - IEC</strong>
-            </div> -->
-            <div class="head-iec">
+            <div style="text-align: center; margin-top: 135px; bottom: 30px;">
                 <strong>HEAD - IEC</strong>
             </div>
         </div>
