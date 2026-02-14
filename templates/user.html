@@ -35,22 +35,25 @@
             font-size: 14px;
         }
 
+        .page-wrapper {
+            min-height: 100vh;
+            /* full page height */
+            display: flex;
+            flex-direction: column;
+        }
+
         .bottom-table {
+            flex: 1;
             border: 1px solid #000;
             padding: 8px;
             margin-top: 5px;
             font-size: 14px;
-            position: relative;
-            /* ADD THIS */
-            min-height: 950px;
-            /* Adjust according to A4 height */
+            display: flex;
+            flex-direction: column;
         }
-
+        
         .head-iec {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            width: 100%;
+            margin-top: auto;
             text-align: center;
         }
 
@@ -117,7 +120,7 @@
     <div style="float: right;">
         <img src="{{this.srm}}" width="170px" height="80px" alt="SRM" />
     </div>
-    <div class="container-fluid" style="clear: both;">
+    <div class="page-wrapper">
         <div class="ie">Internal Examinations - {{ieData.ie}}, {{ieData.month}} {{ieData.year}}</div>
         <div class="ht">HALL TICKET</div>
         <p><strong>Serial No.: 26/{{this.sno}} </strong></p>
