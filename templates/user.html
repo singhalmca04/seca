@@ -40,6 +40,18 @@
             padding: 8px;
             margin-top: 5px;
             font-size: 14px;
+            position: relative;
+            /* ADD THIS */
+            min-height: 950px;
+            /* Adjust according to A4 height */
+        }
+
+        .head-iec {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
         }
 
         h2 {
@@ -129,13 +141,13 @@
                 <tr>
                     <th>PROGRAM/SECTION</th>
                     <td>:&nbsp;&nbsp;
-                    {{#if this.isBtech}}
-                        {{ieData.program}} - {{this.branch}}  {{#if this.isNotCore}} - {{this.specialization}}
+                        {{#if this.isBtech}}
+                        {{ieData.program}} - {{this.branch}} {{#if this.isNotCore}} - {{this.specialization}}
                         {{/if}}
                         /{{this.section}}
-                    {{else}}
+                        {{else}}
                         {{this.branch}} / {{this.section}}
-                    {{/if}}
+                        {{/if}}
                         <!-- {{#if this.isBtech}}
                             {{ieData.program}} - {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
                         {{else}}
@@ -175,7 +187,10 @@
                 <p style="float: left;"><strong>SIGNATURE OF THE CANDIDATE</strong></p>
                 <p style="float: right;"><strong>CLASS MENTOR</strong></p>
             </div>
-            <div style="text-align: center; margin-top: 135px; bottom: 30px;">
+            <!-- <div style="text-align: center; margin-top: 135px; bottom: 30px;">
+                <strong>HEAD - IEC</strong>
+            </div> -->
+            <div class="head-iec">
                 <strong>HEAD - IEC</strong>
             </div>
         </div>
