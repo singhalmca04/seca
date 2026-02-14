@@ -84,12 +84,13 @@
             justify-content: space-between;
         }
 
-        .page-break {
+        /* .page-break {
             page-break-after: always;
             margin: 30px;
-        }
+        } */
 
         @page {
+            size: A4;
             margin: 5mm 10mm 1mm 10mm;
             /* top, right, bottom, left */
         }
@@ -172,9 +173,10 @@
             </div>
         </div>
     </div>
-    {{#unless @last}}
+    <div style="page-break-after: always;"></div>
+    <!-- {{#unless @last}}
     <div class="page-break"></div>
-    {{/unless}}
+    {{/unless}} -->
     {{/each}}
 </body>
 
