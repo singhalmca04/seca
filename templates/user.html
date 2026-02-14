@@ -129,11 +129,18 @@
                 <tr>
                     <th>PROGRAM/SECTION</th>
                     <td>:&nbsp;&nbsp;
-                        {{#if this.isBtech}}
+                    {{#if this.isBtech}}
+                        {{ieData.program}} - {{this.branch}}  {{#if this.isNotCore}} - {{this.specialization}}
+                        {{/if}}
+                        /{{this.section}}
+                    {{else}}
+                        {{this.branch}} / {{this.section}}
+                    {{/if}}
+                        <!-- {{#if this.isBtech}}
                             {{ieData.program}} - {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
                         {{else}}
                             {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
-                        {{/if}}
+                        {{/if}} -->
                     </td>
                 </tr>
                 <tr>
