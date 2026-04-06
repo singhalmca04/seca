@@ -158,7 +158,7 @@ app.post("/finduser", async (req, res) => {
 
 app.get("/findstudents", async (req, res) => {
     try {
-        let data = await Student.find().sort({ semester: 1 });
+        let data = await Student.find().sort({ semester: 1, specialization: 1 });
         res.status(200).send({ data: data });
     } catch (err) {
         console.log(err + "error");
