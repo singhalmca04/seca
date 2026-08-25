@@ -350,7 +350,11 @@ app.post('/uploadexcel', uploadx.single('file'), (req, res) => {
                 {
                     $set: {
                         subcode: subcode,
-                        semester: x.semester?.trim().toUpperCase()
+                        semester: x.semester?.trim().toUpperCase(),
+                        section: x.section?.trim().toUpperCase(),
+                        branch: x.branch?.trim().toUpperCase(),
+                        specialization: x.specialization?.trim().toUpperCase(),
+                        batch: x.batch?.trim()
                     },
                     $setOnInsert: {
                         name: x.Name?.trim().toUpperCase(),
