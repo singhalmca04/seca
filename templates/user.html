@@ -30,7 +30,7 @@
             box-sizing: border-box;
 
             padding: 5mm 10mm 1mm 10mm; */
-            height: 291mm;
+            min-height: 291mm;
             width: 100%;
             page-break-after: always;
             break-after: page;
@@ -45,6 +45,9 @@
 
         .container-fluid {
             clear: both;
+            min-height: calc(291mm - 80px);
+            display: flex;
+            flex-direction: column;
         }
 
         .ie {
@@ -70,6 +73,9 @@
             padding: 8px;
             margin-top: 5px;
             font-size: 14px;
+            flex: 1;
+            position: relative;
+            box-sizing: border-box;
         }
 
         h2 {
@@ -116,7 +122,7 @@
 
         .head-iec {
             position: absolute;
-            bottom: 0;
+            bottom: 20;
             left: 0;
             width: 100%;
             text-align: center;
