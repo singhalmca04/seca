@@ -13,15 +13,45 @@
             padding: 0;
         }
 
-        .container {
-            padding: 20px;
+        html {
+            margin: 0;
+            padding: 0;
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        /* One student = one complete A4 page */
+        .page {
+            width: 210mm;
+            height: 297mm;
+            box-sizing: border-box;
+
+            padding: 5mm 10mm 1mm 10mm;
+
+            page-break-after: always;
+            break-after: page;
+
+            position: relative;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
+            break-after: auto;
+        }
+
+        .container-fluid {
+            clear: both;
         }
 
         .ie {
             text-align: center;
             font-size: 26px;
             font-weight: bold;
-            margin-top: 140px;
+            margin-top: 0;
+            padding-top: 35mm;
         }
 
         .ht {
@@ -83,107 +113,98 @@
             display: flex;
             justify-content: space-between;
         }
-
-        /* .page-break {
-            page-break-after: always;
-            margin: 30px;
-        } */
-
-        @page {
-            size: A4;
-            margin: 5mm 10mm 1mm 10mm;
-            /* top, right, bottom, left */
-        }
     </style>
 </head>
 
 <body>
     {{#each uData.user}}
-    <div style="float: left;">
-        <img src="{{this.srmlogo}}" width="160px" height="80px" alt="Logo" />
-    </div>
-    <div style="float: right;">
-        <img src="{{this.srm}}" width="170px" height="80px" alt="SRM" />
-    </div>
-    <div class="container-fluid" style="clear: both;">
-        <div class="ie">Internal Examinations - {{ieData.ie}}, {{ieData.month}} {{ieData.year}}</div>
-        <div class="ht">HALL TICKET</div>
-        <p><strong>Serial No.: 26/{{this.sno}} </strong></p>
-        <div style="border: 1px solid #000; padding: 0px 8px;">
-            <table class="top-table">
-                <tr>
-                    <th class="col-45">EXAMINATION CENTRE</th>
-                    <td class="col-45">:&nbsp;&nbsp; SRMIST, Delhi-NCR Campus</td>
-                    <th rowspan="5" class="col-10" style="border: 1px solid #000;">
-                        <img src="{{image}}" width="100px" height="130px " alt="student" />
-                    </th>
-                </tr>
-                <tr>
-                    <th>NAME OF THE CANDIDATE</th>
-                    <td>:&nbsp;&nbsp; {{this.name}}</td>
-                </tr>
-                <tr>
-                    <th>REGISTRATION NUMBER</th>
-                    <td>:&nbsp;&nbsp; {{this.regno}}</td>
-                </tr>
-                <tr>
-                    <th>PROGRAM/SECTION</th>
-                    <td>:&nbsp;&nbsp;
-                    {{#if this.isBtech}}
-                        {{ieData.program}} - {{this.branch}}  {{#if this.isNotCore}} - {{this.specialization}}
-                        {{/if}}
-                        /{{this.section}}
-                    {{else}}
-                        {{this.branch}} / {{this.section}}
-                    {{/if}}
-                        <!-- {{#if this.isBtech}}
+    <div class="page">
+        <div style="float: left;">
+            <img src="{{this.srmlogo}}" width="160px" height="80px" alt="Logo" />
+        </div>
+        <div style="float: right;">
+            <img src="{{this.srm}}" width="170px" height="80px" alt="SRM" />
+        </div>
+        <div class="container-fluid" style="clear: both;">
+            <div class="ie">Internal Examinations - {{ieData.ie}}, {{ieData.month}} {{ieData.year}}</div>
+            <div class="ht">HALL TICKET</div>
+            <p><strong>Serial No.: 26/{{this.sno}} </strong></p>
+            <div style="border: 1px solid #000; padding: 0px 8px;">
+                <table class="top-table">
+                    <tr>
+                        <th class="col-45">EXAMINATION CENTRE</th>
+                        <td class="col-45">:&nbsp;&nbsp; SRMIST, Delhi-NCR Campus</td>
+                        <th rowspan="5" class="col-10" style="border: 1px solid #000;">
+                            <img src="{{image}}" width="100px" height="130px " alt="student" />
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>NAME OF THE CANDIDATE</th>
+                        <td>:&nbsp;&nbsp; {{this.name}}</td>
+                    </tr>
+                    <tr>
+                        <th>REGISTRATION NUMBER</th>
+                        <td>:&nbsp;&nbsp; {{this.regno}}</td>
+                    </tr>
+                    <tr>
+                        <th>PROGRAM/SECTION</th>
+                        <td>:&nbsp;&nbsp;
+                            {{#if this.isBtech}}
+                            {{ieData.program}} - {{this.branch}} {{#if this.isNotCore}} - {{this.specialization}}
+                            {{/if}}
+                            /{{this.section}}
+                            {{else}}
+                            {{this.branch}} / {{this.section}}
+                            {{/if}}
+                            <!-- {{#if this.isBtech}}
                             {{ieData.program}} - {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
                         {{else}}
                             {{this.branch}}{{#if this.isNotCore}} - {{this.specialization}}{{/if}}/{{this.section}}
                         {{/if}} -->
-                    </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </table>
-        </div>
-        <div class="bottom-table">
-            <table class="exam-table" cellpadding="20">
-                <tr>
-                    <th>SEMESTER</th>
-                    <th>SUB. CODE</th>
-                    <th style="padding-left:15px;text-align: left;">SUBJECT</th>
-                    <th style="white-space: nowrap;">DATE OF EXAM</th>
-                    <th>SESSION</th>
-                </tr>
-                {{#each ieDetails}}
-                <tr>
-                    <td>{{semester}}</td>
-                    <td>{{subcode}}</td>
-                    <td style="padding-left:15px;text-align: left;">{{subject}}</td>
-                    <td>{{examdate}}</td>
-                    <td>{{session}}</td>
-                </tr>
-                {{/each}}
-            </table>
-
-            <p style="text-align: center; margin-top: 20px;">**** End of Statement ****</p>
-
-            <div class="footer">
-                <p style="float: left;"><strong>SIGNATURE OF THE CANDIDATE</strong></p>
-                <p style="float: right;"><strong>CLASS MENTOR</strong></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
             </div>
-            <div style="text-align: center; margin-top: 135px; bottom: 30px;">
-                <strong>HEAD - IEC</strong>
+            <div class="bottom-table">
+                <table class="exam-table" cellpadding="20">
+                    <tr>
+                        <th>SEMESTER</th>
+                        <th>SUB. CODE</th>
+                        <th style="padding-left:15px;text-align: left;">SUBJECT</th>
+                        <th style="white-space: nowrap;">DATE OF EXAM</th>
+                        <th>SESSION</th>
+                    </tr>
+                    {{#each ieDetails}}
+                    <tr>
+                        <td>{{semester}}</td>
+                        <td>{{subcode}}</td>
+                        <td style="padding-left:15px;text-align: left;">{{subject}}</td>
+                        <td>{{examdate}}</td>
+                        <td>{{session}}</td>
+                    </tr>
+                    {{/each}}
+                </table>
+
+                <p style="text-align: center; margin-top: 20px;">**** End of Statement ****</p>
+
+                <div class="footer">
+                    <p style="float: left;"><strong>SIGNATURE OF THE CANDIDATE</strong></p>
+                    <p style="float: right;"><strong>CLASS MENTOR</strong></p>
+                </div>
+                <div style="text-align: center; margin-top: 135px; bottom: 30px;">
+                    <strong>HEAD - IEC</strong>
+                </div>
             </div>
         </div>
-    </div>
-    <div style="page-break-after: always;"></div>
-    <!-- {{#unless @last}}
+        <!-- <div style="page-break-after: always;"></div> -->
+        <!-- {{#unless @last}}
     <div class="page-break"></div>
     {{/unless}} -->
+    </div>
     {{/each}}
 </body>
 
