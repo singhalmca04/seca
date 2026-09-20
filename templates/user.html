@@ -20,16 +20,16 @@
 
         @page {
             size: A4;
-            margin: 0;
+            margin: 5mm 10mm 1mm 10mm;
         }
 
         /* One student = one complete A4 page */
         .page {
-            width: 210mm;
+            /* width: 210mm;
             height: 297mm;
             box-sizing: border-box;
 
-            padding: 5mm 10mm 1mm 10mm;
+            padding: 5mm 10mm 1mm 10mm; */
 
             page-break-after: always;
             break-after: page;
@@ -50,8 +50,7 @@
             text-align: center;
             font-size: 26px;
             font-weight: bold;
-            margin-top: 0;
-            padding-top: 35mm;
+            margin-top: 30px;
         }
 
         .ht {
@@ -112,6 +111,14 @@
             margin-top: 60px;
             display: flex;
             justify-content: space-between;
+        }
+
+        .head-iec {
+            position: absolute;
+            bottom: 10mm;
+            left: 0;
+            width: 100%;
+            text-align: center;
         }
     </style>
 </head>
@@ -195,7 +202,7 @@
                     <p style="float: left;"><strong>SIGNATURE OF THE CANDIDATE</strong></p>
                     <p style="float: right;"><strong>CLASS MENTOR</strong></p>
                 </div>
-                <div style="text-align: center; margin-top: 135px; bottom: 30px;">
+                <div class="head-iec">
                     <strong>HEAD - IEC</strong>
                 </div>
             </div>
