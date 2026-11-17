@@ -205,6 +205,13 @@ app.get('/downloaduser/:branch/:specialization/:semester/:section/:group', async
     }
     if (users && users.length) {
         let ieDetails = await Student.find({ semester, batch: users[0].batch, specialization }).sort({ examdate: 1 });
+        ieDetails.sort((a, b) => {
+            const [d1, m1, y1] = a.examdate.split('.').map(Number);
+            const [d2, m2, y2] = b.examdate.split('.').map(Number);
+
+            return new Date(y1, m1 - 1, d1) -
+                new Date(y2, m2 - 1, d2);
+        });
         if (!ieDetails.length) return res.status(204).send();
         const userWithSubject = await Promise.all(users.map(async (user) => {
             const img = user.image ? await getBase64FromUrl(user.image) : def;
